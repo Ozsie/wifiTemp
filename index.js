@@ -22,13 +22,11 @@ firebase.auth().signInWithEmailAndPassword(email, password).then(function() {
     storeMeasurement(id, voltage, temperature, function(error) {
       if (!error) {
         console.log("Measurement stored");
-        res.status(200).send("blipp");
       } else {
         console.error(error.code + ": " + error.message);
-        res.status(500).send(error.code);
       }
     });
-
+    res.status(200).send("blipp");
   });
 
 
