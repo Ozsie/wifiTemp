@@ -16,26 +16,34 @@
 
     <style media="screen">
       body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
       #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
       #latest { color: rgba(0,0,0,0.4); text-align: center; font-size: 32px; }
+      .warning { background-color: red; width: 100%; text-align: center; font-size: 28px; margin-left: 20%; width: 60%; border-radius: 10px; }
+      .chart { width: 100%; }
+      .wrapper { display: grid; grid-template-columns: 50% 50%; grid-gap: 10px; }
+      .box { border-radius: 5px; padding: 20px; }
       @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
+        body { margin-top: 0; }
+        .wrapper { grid-template-columns: 100%; }
       }
     </style>
   </head>
   <body>
     <script src="index.js"></script>
     <p id="load">Laddar</p>
-    <div id="latest">
-
+    <p id="latest"></p>
+    <p id="batteryWarning" class="warning"></p>
+    <p id="reportWarning" class="warning"></p>
+    <p id="sensor"></p>
+    <div class="wrapper">
+      <div class="box">
+        <p id="temp"></p>
+        <div id="temperature" class="ct-chart ct-golden-section"></div>
+      </div>
+      <div class="box">
+        <p id="volt"></p>
+        <div id="voltage" class="ct-chart ct-golden-section"></div>
+      </div>
     </div>
-    <div class="ct-chart"></div>
   </body>
 </html>
