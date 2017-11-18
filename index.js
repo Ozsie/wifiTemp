@@ -44,7 +44,7 @@ firebase.auth().signInWithEmailAndPassword(email, password).then(function() {
 var storeMeasurement = function(id, voltage, temperature, callback) {
   var date = Date.now();
   database.ref(id + '/' + date).set({
-    voltage: voltage,
+    voltage: voltage/1024,
     temperature: temperature
   }).then(callback).catch(callback);
 };
