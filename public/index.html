@@ -13,6 +13,8 @@
     <script defer src="/__/firebase/init.js"></script>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
     <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.2/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.2/locale/sv.js"></script>
 
     <style media="screen">
       body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
@@ -22,6 +24,7 @@
       .chart { width: 100%; }
       .wrapper { display: grid; grid-template-columns: 50% 50%; grid-gap: 10px; }
       .box { border-radius: 5px; padding: 20px; }
+      .select select { margin-left: 5%; font-size: 32px; border-radius: 5px; padding: 40px; background-color: #3b8ec2; color: #fff;}
       @media (max-width: 600px) {
         body { margin-top: 0; }
         .wrapper { grid-template-columns: 100%; }
@@ -31,7 +34,10 @@
   <body>
     <script src="index.js"></script>
     <p id="load">Laddar</p>
-    <p id="latest"></p>
+    <div class="select">
+      <select id="sensors" onchange="changeSensor()"></select>
+      <span id="latest"></span>
+    </div>
     <p id="batteryWarning" class="warning"></p>
     <p id="reportWarning" class="warning"></p>
     <p id="sensor"></p>

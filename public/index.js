@@ -1,20 +1,29 @@
+var currentSensorIndex = 0;
+var sensorList = [];
+
 document.addEventListener('DOMContentLoaded', function() {
   try {
     let app = firebase.app();
-    let features = ['auth', 'database', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
-    document.getElementById('load').innerHTML = ``;
+    document.getElementById('load').innerHTML = '';
 
     firebase.database().ref('/').on('value', snapshot => {
       var tempChartData = { labels: [], series: [] };
       var voltageChartData = { labels: [], series: [] };
       var temp = snapshot.val();
       var now = Date.now();
-      var sensorList = [];
+
       for (var sensorId in temp) {
         if (sensorId === 'names') {
           continue;
         }
         var sensor = {id: sensorId, name: temp.names[sensorId].name, warnings: {}};
+
+        var sensorSelectBox = document.getElementById('sensors');
+        var option = document.createElement('option');
+        option.text = sensor.name;
+        option.value = sensorId;
+        sensorSelectBox.add(option);
+
         tempChartData = { labels: [], series: [] };
         voltageChartData = { labels: [], series: [] };
         var temperature = [];
@@ -25,10 +34,17 @@ document.addEventListener('DOMContentLoaded', function() {
           if (now - date > (12*60*60*1000) && temp[sensorId].length > 24) {
             continue;
           } else {
-            var d = new Date(0);
-            d.setUTCMilliseconds(date);
-            tempChartData.labels.push(d);
-            voltageChartData.labels.push(d);
+            var m = moment(date, "x");
+            moment.locale();
+            var stringDate;
+            if (m.isBetween(moment().startOf('day'), moment().startOf('day').minute(30))) {
+              stringDate = m.format('lll');
+            } else {
+              stringDate = m.format('LT');
+            }
+            console.log(stringDate);
+            tempChartData.labels.push(stringDate);
+            voltageChartData.labels.push(stringDate);
             voltage.push(temp[sensorId][date].voltage);
             temperature.push(temp[sensorId][date].temperature);
             if (i == Object.keys(temp[sensorId]).length - 1) {
@@ -47,28 +63,41 @@ document.addEventListener('DOMContentLoaded', function() {
         sensor.voltageChartData = voltageChartData;
         sensorList.push(sensor);
       }
-      var series = sensorList[0].tempChartData.series[0];
-      var current = series[series.length - 1];
-      var labels = sensorList[0].tempChartData.labels;
-      var currentDate = labels[labels.length - 1];
-      document.getElementById('latest').innerHTML = sensorList[0].name + ': ' + current + ' °C (' + d + ')';
-      if (sensorList[0].warnings.battery) {
-        document.getElementById('batteryWarning').innerHTML = sensorList[0].name + ' behöver laddas.';
-      } else {
-        document.getElementById('batteryWarning').innerHTML = '';
-      }
-      if (sensorList[0].warnings.noReport) {
-        document.getElementById('reportWarning').innerHTML = sensorList[0].name + ' har inte rapporterat i tid.';
-      } else {
-        document.getElementById('reportWarning').innerHTML = '';
-      }
-      document.getElementById('temp').innerHTML = 'Temperatur';
-      document.getElementById('volt').innerHTML = 'Spänning';
-      new Chartist.Line('#temperature', sensorList[0].tempChartData);
-      new Chartist.Line('#voltage', sensorList[0].voltageChartData);
+      updateDom();
     });
   } catch (e) {
     console.error(e);
     document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
   }
 });
+
+function updateDom() {
+  var series = sensorList[currentSensorIndex].tempChartData.series[0];
+  var current = series[series.length - 1];
+  var labels = sensorList[currentSensorIndex].tempChartData.labels;
+  var currentDate = labels[labels.length - 1];
+  document.getElementById('latest').innerHTML = ' ' + current + ' °C (' + currentDate + ')';
+  if (sensorList[currentSensorIndex].warnings.battery) {
+    document.getElementById('batteryWarning').innerHTML = sensorList[currentSensorIndex].name + ' behöver laddas.';
+  } else {
+    document.getElementById('batteryWarning').innerHTML = '';
+  }
+  if (sensorList[currentSensorIndex].warnings.noReport) {
+    document.getElementById('reportWarning').innerHTML = sensorList[currentSensorIndex].name + ' har inte rapporterat i tid.';
+  } else {
+    document.getElementById('reportWarning').innerHTML = '';
+  }
+  document.getElementById('temp').innerHTML = 'Temperatur';
+  document.getElementById('volt').innerHTML = 'Spänning';
+  new Chartist.Line('#temperature', sensorList[currentSensorIndex].tempChartData);
+  new Chartist.Line('#voltage', sensorList[currentSensorIndex].voltageChartData);
+}
+
+function changeSensor() {
+  for (var index in sensorList) {
+    if (sensorList[index] === document.getElementById('sensors').value) {
+      currentSensorIndex = index;
+      break;
+    }
+  }
+};
