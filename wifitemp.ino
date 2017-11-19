@@ -106,7 +106,10 @@ void sendTemperature(float temp) {
   if (attempts == 4) {
     Serial.println("Failed to send temperature");
   } else {
-    String url = "/?id=" + String(ESP.getChipId()) + "&v=" + String(ESP.getVcc()) + "&t=" + String(temp);
+    String url = "/?id=" + String(ESP.getChipId()) +
+                   "&v=" + String(ESP.getVcc()) +
+                   "&t=" + String(temp)
+                   "&s=" + String(WiFi.RSSI());
   
     Serial.print("POST data to URL: ");
     Serial.println(url);
