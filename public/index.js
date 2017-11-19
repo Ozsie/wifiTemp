@@ -12,9 +12,11 @@ document.addEventListener('DOMContentLoaded', function() {
       var temp = snapshot.val();
       var now = Date.now();
       var sensorSelectBox = document.getElementById('sensors');
-      for (i = 0; i < sensorSelectBox.options.length; i++) {
-        sensorSelectBox.options[i] = null;
+      var i;
+      for(i = sensorSelectBox.options.length - 1; i >= 0; i--) {
+          sensorSelectBox.remove(i);
       }
+      sensorList = [];
 
       for (var sensorId in temp) {
         if (sensorId === 'names') {
@@ -51,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             tempChartData.labels.push(stringDate);
             voltageChartData.labels.push(stringDate);
-            voltage.push(temp[sensorId][date].voltage);
+            voltage.push(Math.round(temp[sensorId][date].voltage * 10) / 10);
             temperature.push(temp[sensorId][date].temperature);
             if (i == Object.keys(temp[sensorId]).length - 1) {
               if (temp[sensorId][date].voltage < 3.0) {
@@ -69,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sensor.voltageChartData = voltageChartData;
         sensorList.push(sensor);
       }
+      sensorSelectBox.value = sensorList[currentSensorIndex].id
       updateDom();
     });
   } catch (e) {
