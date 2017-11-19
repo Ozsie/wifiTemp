@@ -32,10 +32,10 @@ document.addEventListener('DOMContentLoaded', function() {
         option.value = sensorId;
         sensorSelectBox.add(option);
 
-        chartData = buildArrays(temp, sensorId, sensor, (3*60*60*1000));
+        chartData = buildArrays(temp, sensorId, sensor, (12*60*60*1000));
         var attempts = 1;
         while (chartData.t.series[0].length === 0 && attempts <= 5) {
-          chartData = buildArrays(temp, sensorId, sensor, ((3 + (attempts * 2))*60*60*1000))
+          chartData = buildArrays(temp, sensorId, sensor, ((12 + (attempts * 2))*60*60*1000))
           attempts++;
         }
         sensor.tempChartData = chartData.t;
