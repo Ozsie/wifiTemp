@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         sensor.tempChartData = chartData.t;
         sensor.voltageChartData = chartData.v;
+        sensor.signalChartData = chartData.s;
         sensorList.push(sensor);
       }
       sensorSelectBox.value = sensorList[currentSensorIndex].id
@@ -55,8 +56,10 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
   var now = Date.now();
   tempChartData = { labels: [], series: [] };
   voltageChartData = { labels: [], series: [] };
+  signalChartData = { labels: [], series: [] };
   var temperature = [];
   var voltage = [];
+  var signal = [];
   var i = -1;
   for (date in temp[sensorId]) {
     i++;
@@ -74,7 +77,11 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
       }
       tempChartData.labels.push(stringDate);
       voltageChartData.labels.push(stringDate);
-      voltage.push(Math.round(temp[sensorId][date].voltage * 10) / 10);
+      voltage.push(Math.round(temp[sensorId][date].voltage * 100) / 100);
+      if (temp[sensorId][date].signal) {
+        signal.push(temp[sensorId][date].signal);
+        signalChartData.labels.push(stringDate);
+      }
       temperature.push(Math.round(temp[sensorId][date].temperature * 10) / 10);
       if (i == Object.keys(temp[sensorId]).length - 1) {
         if (temp[sensorId][date].voltage < 3.0) {
@@ -88,8 +95,9 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
   }
   tempChartData.series.push(temperature);
   voltageChartData.series.push(voltage);
+  signalChartData.series.push(signal);
 
-  return {v: voltageChartData, t: tempChartData};
+  return {v: voltageChartData, t: tempChartData, s: signalChartData};
 }
 
 function updateDom() {
@@ -110,8 +118,10 @@ function updateDom() {
   }
   document.getElementById('temp').innerHTML = 'Temperatur';
   document.getElementById('volt').innerHTML = 'Spänning';
+  document.getElementById('sig').innerHTML = 'Signalstyrka';
   new Chartist.Line('#temperature', sensorList[currentSensorIndex].tempChartData);
   new Chartist.Line('#voltage', sensorList[currentSensorIndex].voltageChartData);
+  new Chartist.Line('#signal', sensorList[currentSensorIndex].signalChartData);
 }
 
 function changeSensor() {

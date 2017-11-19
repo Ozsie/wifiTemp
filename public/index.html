@@ -24,6 +24,9 @@
       .chart { width: 100%; }
       .wrapper { display: grid; grid-template-columns: 50% 50%; grid-gap: 10px; }
       .box { border-radius: 5px; padding: 20px; }
+      .b { grid-column: 2 / span 1; }
+  	  .a { grid-column: 1 ; grid-row: 1 / span 2; }
+	  .d { grid-column: 2 ; grid-row: 2; }
       .select select { margin-left: 5%; font-size: 32px; border-radius: 5px; padding: 40px; background-color: #3b8ec2; color: #fff;}
       @media (max-width: 600px) {
         body { margin-top: 0; }
@@ -42,13 +45,17 @@
     <p id="reportWarning" class="warning"></p>
     <p id="sensor"></p>
     <div class="wrapper">
-      <div class="box">
+      <div class="box a">
         <p id="temp"></p>
         <div id="temperature" class="ct-chart ct-golden-section"></div>
       </div>
-      <div class="box">
+      <div class="box b">
         <p id="volt"></p>
-        <div id="voltage" class="ct-chart ct-golden-section"></div>
+        <div id="voltage" class="ct-chart"></div>
+      </div>
+      <div class="box c">
+        <p id="sig"></p>
+        <div id="signal" class="ct-chart "></div>
       </div>
     </div>
   </body>
