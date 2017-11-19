@@ -8,7 +8,7 @@ firebase.initializeApp(config);
 var database;
 
 firebase.auth().signInWithEmailAndPassword(email, password).then(function() {
-  console.log("Signed in as " + email);
+  console.log('Signed in as ' + email);
   database = firebase.database();
 
   var app = express();
@@ -16,35 +16,37 @@ firebase.auth().signInWithEmailAndPassword(email, password).then(function() {
 
   app.get('/', function(req, res) {
     var id = req.query.id;
-    var voltage = req.query.v;
+    var voltage = req.query.v/1024;
     var temperature = req.query.t;
-    console.log("Got data from " + id + ": " + (voltage/1024) + " V, " + temperature + " C");
-    storeMeasurement(id, voltage, temperature, function(error) {
+    var signal = req.query.s;
+    console.log('Got data from ' + id + ': ' + voltage + ' V, ' + temperature + ' C, ' + signal + 'dB');
+    storeMeasurement(id, voltage, temperature, signal, function(error) {
       if (!error) {
-        console.log("Measurement stored");
+        console.log('Measurement stored');
       } else {
-        console.error(error.code + ": " + error.message);
+        console.error(error.code + ': ' + error.message);
       }
     });
-    res.status(200).send("blipp");
+    res.status(200).send('blipp');
   });
 
 
   app.listen(8080);
 
-  console.log("Listening on port 8080");
+  console.log('Listening on port 8080');
 }).catch(function(error) {
   // Handle Errors here.
   var errorCode = error.code;
   var errorMessage = error.message;
-  console.error(errorCode + ": " + errorMessage);
+  console.error(errorCode + ': ' + errorMessage);
   process.exit(errorCode);
 });
 
-var storeMeasurement = function(id, voltage, temperature, callback) {
+var storeMeasurement = function(id, voltage, temperature, signal, callback) {
   var date = Date.now();
   database.ref(id + '/' + date).set({
-    voltage: voltage/1024,
-    temperature: temperature
+    voltage: voltage,
+    temperature: temperature,
+    signal: signal
   }).then(callback).catch(callback);
 };
