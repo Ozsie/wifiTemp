@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
       var tempChartData = { labels: [], series: [] };
       var voltageChartData = { labels: [], series: [] };
       var temp = snapshot.val();
-      var now = Date.now();
       var sensorSelectBox = document.getElementById('sensors');
       var i;
       for(i = sensorSelectBox.options.length - 1; i >= 0; i--) {
@@ -33,42 +32,14 @@ document.addEventListener('DOMContentLoaded', function() {
         option.value = sensorId;
         sensorSelectBox.add(option);
 
-        tempChartData = { labels: [], series: [] };
-        voltageChartData = { labels: [], series: [] };
-        var temperature = [];
-        var voltage = [];
-        var i = -1;
-        for (date in temp[sensorId]) {
-          i++;
-          if (now - date > (12*60*60*1000) && temp[sensorId].length > 24) {
-            continue;
-          } else {
-            var m = moment(date, "x");
-            moment.locale();
-            var stringDate;
-            if (m.isBetween(moment().startOf('day'), moment().startOf('day').minute(30))) {
-              stringDate = m.format('lll');
-            } else {
-              stringDate = m.format('LT');
-            }
-            tempChartData.labels.push(stringDate);
-            voltageChartData.labels.push(stringDate);
-            voltage.push(Math.round(temp[sensorId][date].voltage * 10) / 10);
-            temperature.push(temp[sensorId][date].temperature);
-            if (i == Object.keys(temp[sensorId]).length - 1) {
-              if (temp[sensorId][date].voltage < 3.0) {
-                sensor.warnings.battery = true;
-              }
-              if (now - date > 60*60*1000) {
-                sensor.warnings.noReport = true;
-              }
-            }
-          }
+        chartData = buildArrays(temp, sensorId, sensor, (3*60*60*1000));
+        var attempts = 1;
+        while (chartData.t.series[0].length === 0 && attempts <= 5) {
+          chartData = buildArrays(temp, sensorId, sensor, ((3 + (attempts * 2))*60*60*1000))
+          attempts++;
         }
-        tempChartData.series.push(temperature);
-        voltageChartData.series.push(voltage);
-        sensor.tempChartData = tempChartData;
-        sensor.voltageChartData = voltageChartData;
+        sensor.tempChartData = chartData.t;
+        sensor.voltageChartData = chartData.v;
         sensorList.push(sensor);
       }
       sensorSelectBox.value = sensorList[currentSensorIndex].id
@@ -79,6 +50,47 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
   }
 });
+
+function buildArrays(temp, sensorId, sensor, timeLimit) {
+  var now = Date.now();
+  tempChartData = { labels: [], series: [] };
+  voltageChartData = { labels: [], series: [] };
+  var temperature = [];
+  var voltage = [];
+  var i = -1;
+  for (date in temp[sensorId]) {
+    i++;
+    var diff = now - date;
+    if (diff > timeLimit && Object.keys(temp[sensorId]).length > 10) {
+      continue;
+    } else {
+      var m = moment(date, "x");
+      moment.locale();
+      var stringDate;
+      if (m.isBetween(moment().startOf('day'), moment().startOf('day').minute(30))) {
+        stringDate = m.format('lll');
+      } else {
+        stringDate = m.format('LT');
+      }
+      tempChartData.labels.push(stringDate);
+      voltageChartData.labels.push(stringDate);
+      voltage.push(Math.round(temp[sensorId][date].voltage * 10) / 10);
+      temperature.push(Math.round(temp[sensorId][date].temperature * 10) / 10);
+      if (i == Object.keys(temp[sensorId]).length - 1) {
+        if (temp[sensorId][date].voltage < 3.0) {
+          sensor.warnings.battery = true;
+        }
+        if (now - date > 60*60*1000) {
+          sensor.warnings.noReport = true;
+        }
+      }
+    }
+  }
+  tempChartData.series.push(temperature);
+  voltageChartData.series.push(voltage);
+
+  return {v: voltageChartData, t: tempChartData};
+}
 
 function updateDom() {
   var series = sensorList[currentSensorIndex].tempChartData.series[0];
