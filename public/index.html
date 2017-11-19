@@ -24,13 +24,16 @@
       .chart { width: 100%; }
       .wrapper { display: grid; grid-template-columns: 50% 50%; grid-gap: 10px; }
       .box { border-radius: 5px; padding: 20px; }
-      .b { grid-column: 2 / span 1; }
   	  .a { grid-column: 1 ; grid-row: 1 / span 2; }
-	  .d { grid-column: 2 ; grid-row: 2; }
+      .b { grid-column: 2 / span 1; }
+	    .c { grid-column: 2 ; grid-row: 2; }
       .select select { margin-left: 5%; font-size: 32px; border-radius: 5px; padding: 40px; background-color: #3b8ec2; color: #fff;}
       @media (max-width: 600px) {
         body { margin-top: 0; }
         .wrapper { grid-template-columns: 100%; }
+        .a { grid-column: 1 ; grid-row: 1 / span 1; }
+        .b { grid-column: 1 / span 1; }
+        .c { grid-column: 1 ; grid-row: 2; }
       }
     </style>
   </head>
