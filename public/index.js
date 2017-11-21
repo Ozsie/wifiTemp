@@ -1,6 +1,6 @@
 var currentSensorIndex = 0;
 if (window.localStorage.getItem("currentSensorIndex")) {
-  currentSensorIndex = window.localStorage.getItem("currentSensorIndexfireba");
+  currentSensorIndex = window.localStorage.getItem("currentSensorIndex");
 }
 var sensorList = [];
 
