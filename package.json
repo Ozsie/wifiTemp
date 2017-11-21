@@ -3,10 +3,5 @@
   "version": "1.0.0",
   "main": "index.js",
   "author": "Oscar Djupfeldt",
-  "license": "MIT",
-  "dependencies": {
-    "body-parser": "~1.15",
-    "express": "^4.15.3",
-    "firebase": "^4.5.2"
-  }
+  "license": "MIT"
 }
