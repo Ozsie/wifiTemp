@@ -1,4 +1,7 @@
 var currentSensorIndex = 0;
+if (window.localStorage.getItem("currentSensorIndex")) {
+  currentSensorIndex = window.localStorage.getItem("currentSensorIndexfireba");
+}
 var sensorList = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -70,6 +73,9 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
     } else {
       var m = moment(date, "x");
       moment.locale();
+      if (!m.isValid()) {
+        continue;
+      }
       var stringDate;
       if (m.isBetween(moment().startOf('day'), moment().startOf('day').minute(30))) {
         stringDate = m.format('lll');
@@ -130,6 +136,7 @@ function changeSensor() {
     var selected = document.getElementById('sensors').value;
     if (sensorList[index].id === selected) {
       currentSensorIndex = index;
+      window.localStorage.setItem("currentSensorIndex", currentSensorIndex);
       updateDom();
       break;
     }
