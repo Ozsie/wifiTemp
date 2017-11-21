@@ -61,8 +61,9 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
   var voltage = [];
   var signal = [];
   var i = -1;
-  for (date in temp[sensorId]) {
+  for (id in temp[sensorId]) {
     i++;
+    var date = temp[sensorId][id].time;
     var diff = now - date;
     if (diff > timeLimit && Object.keys(temp[sensorId]).length > 10) {
       continue;
@@ -77,14 +78,14 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
       }
       tempChartData.labels.push(stringDate);
       voltageChartData.labels.push(stringDate);
-      voltage.push(Math.round(temp[sensorId][date].voltage * 100) / 100);
-      if (temp[sensorId][date].signal) {
-        signal.push(temp[sensorId][date].signal);
+      voltage.push(Math.round(temp[sensorId][id].voltage * 100) / 100);
+      if (temp[sensorId][id].signal) {
+        signal.push(temp[sensorId][id].signal);
         signalChartData.labels.push(stringDate);
       }
-      temperature.push(Math.round(temp[sensorId][date].temperature * 10) / 10);
+      temperature.push(Math.round(temp[sensorId][id].temperature * 10) / 10);
       if (i == Object.keys(temp[sensorId]).length - 1) {
-        if (temp[sensorId][date].voltage < 3.0) {
+        if (temp[sensorId][id].voltage < 3.0) {
           sensor.warnings.battery = true;
         }
         if (now - date > 60*60*1000) {
