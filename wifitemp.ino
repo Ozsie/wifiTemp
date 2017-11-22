@@ -1,4 +1,7 @@
-#include <WiFiClient.h>
+#include <SerialTransceiver.h>
+#include <Thing.h>
+
+#include <WiFiClient.h><
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <Base64.h>
@@ -50,6 +53,7 @@ void loop() {
       temp = DS18B20.getTempCByIndex(0);
       Serial.print("Temperature: ");
       Serial.println(temp);
+      delay(100);
       attempts++;
     } while ((temp > 80.0 || temp == (-127.0)) && attempts < 4);
 
@@ -88,12 +92,12 @@ void reset() {
   char hubIp[32] = "";
   uint16_t hubPort = NULL;
   saveCredentials();
-  Serial.println("Restarting"):
+  Serial.println("Restarting");
   ESP.restart();
 }
 
 void sendTemperature(float temp) {  
-  WiFiClient client;
+  WiFiClientSecure client;
 
   uint16_t attempts = 0;
    
@@ -106,33 +110,39 @@ void sendTemperature(float temp) {
   if (attempts == 4) {
     Serial.println("Failed to send temperature");
   } else {
+    /*
     String url = "/?id=" + String(ESP.getChipId()) +
                    "&v=" + String(ESP.getVcc()) +
-                   "&t=" + String(temp)
+                   "&t=" + String(temp) +
                    "&s=" + String(WiFi.RSSI());
+                   */
+    String url = "/" + String(ESP.getChipId()) + ".json";
+
+    String payload = "{\"voltage\":" + String(ESP.getVcc()/1024) +
+                     ",\"temperature\":" + String(temp) +
+                     ",\"signal\":" + String(WiFi.RSSI()) + "}";
   
     Serial.print("POST data to URL: ");
+    Serial.print(hubIp);
     Serial.println(url);
+    Serial.print("Payload: ");
+    Serial.println(payload);
+    Serial.print("Content length :");
+    Serial.println(payload.length());
     
-    client.println(String("GET ") + url + " HTTP/1.1");
+    client.println(String("POST ") + url + " HTTP/1.1");
+    client.println("Content-Type: application/json");
+    client.println("Host: " + String(hubIp));
+    client.println("Cache-Control: no-cache");
+    client.println("Content-Length: " + String(payload.length()));
     client.println();
-    unsigned long timeout = millis();
+    client.println("{\"voltage\":" + String(ESP.getVcc()/1024) + ",\"temperature\":" + String(temp) + ",\"signal\":" + String(WiFi.RSSI()) + "}");
     
-    while (client.available() == 0) {
-      if (millis() - timeout > 5000) {
-        Serial.println(">>> Client Timeout !");
-        client.stop();
-        return;
-      }
-    }
-    
-    // Read all the lines of the reply from server and print them to Serial
-    while(client.available()){
+    delay(800);
+    Serial.println("Response: ");
+    while(client.available()) {
       String line = client.readStringUntil('\r');
-      if (line == "reset") {
-        Serial.print("Reset received");
-        //reset();
-      }
+      Serial.print(line);
     }
   }
 }
