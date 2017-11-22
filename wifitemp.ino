@@ -118,7 +118,7 @@ void sendTemperature(float temp) {
                    */
     String url = "/" + String(ESP.getChipId()) + ".json";
 
-    String payload = "{\"voltage\":" + String(ESP.getVcc()/1024) +
+    String payload = "{\"voltage\":" + String(ESP.getVcc()) +
                      ",\"temperature\":" + String(temp) +
                      ",\"signal\":" + String(WiFi.RSSI()) + "}";
   
@@ -136,7 +136,7 @@ void sendTemperature(float temp) {
     client.println("Cache-Control: no-cache");
     client.println("Content-Length: " + String(payload.length()));
     client.println();
-    client.println("{\"voltage\":" + String(ESP.getVcc()/1024) + ",\"temperature\":" + String(temp) + ",\"signal\":" + String(WiFi.RSSI()) + "}");
+    client.println(payload);
     
     delay(800);
     Serial.println("Response: ");
