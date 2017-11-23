@@ -149,7 +149,7 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
       }
     }
   }
-  sensor.avgExecutionTime = (sumExecTime / countExecTime);
+  sensor.avgExecutionTime = Math.round((sumExecTime / countExecTime) * 10) / 10;
   tempChartSettings.low = minTemp - 5;
   tempChartSettings.high = maxTemp + 4;
   tempChartData.series.push(temperature);
