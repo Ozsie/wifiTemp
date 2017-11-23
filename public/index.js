@@ -13,7 +13,7 @@ var voltageChartSettings = {
   low: 0,
   high: 4,
   plugins: [
-    Chartist.plugins.tooltip()
+    Chartist.plugins.tooltip({anchorToPoint: true})
   ]
 };
 
@@ -26,7 +26,7 @@ var signalChartSettings = {
   low: -90,
   high: -20,
   plugins: [
-    Chartist.plugins.tooltip()
+    Chartist.plugins.tooltip({anchorToPoint: true})
   ]
 };
 
@@ -37,7 +37,7 @@ var tempChartSettings = {
     }
   },
   plugins: [
-    Chartist.plugins.tooltip()
+    Chartist.plugins.tooltip({anchorToPoint: true})
   ]
 };
 
