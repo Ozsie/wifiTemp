@@ -1,3 +1,5 @@
+#include "wifitemp.h"
+
 void handleRoot() {
   if (server.arg("ssid") == "") {
     server.send(200, "text/html", "<h1>SSID missing</h1>");

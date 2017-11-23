@@ -1,31 +1,9 @@
-#include <SerialTransceiver.h>
-#include <Thing.h>
-
-#include <WiFiClient.h><
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
-#include <Base64.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
-#include <EEPROM.h>
-
-ESP8266WebServer server(80);
-
-#define ONE_WIRE_BUS 2  // DS18B20 pin
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature DS18B20(&oneWire);
+#include "wifitemp.h"
 
 ADC_MODE(ADC_VCC);
 
-const int sleepTimeS = 1800;
-const int retrySleepTimeS = 60;
-
-char wifiSsid[32] = "";
-char wifiPassword[32] = "";
-char hubIp[32] = "";
-uint16_t hubPort;
-
 void setup() {
+  start = millis();
   Serial.begin(115200);
 
   Serial.print("EEPROM size required: ");
@@ -110,17 +88,12 @@ void sendTemperature(float temp) {
   if (attempts == 4) {
     Serial.println("Failed to send temperature");
   } else {
-    /*
-    String url = "/?id=" + String(ESP.getChipId()) +
-                   "&v=" + String(ESP.getVcc()) +
-                   "&t=" + String(temp) +
-                   "&s=" + String(WiFi.RSSI());
-                   */
     String url = "/" + String(ESP.getChipId()) + ".json";
 
     String payload = "{\"voltage\":" + String(ESP.getVcc()) +
                      ",\"temperature\":" + String(temp) +
-                     ",\"signal\":" + String(WiFi.RSSI()) + "}";
+                     ",\"signal\":" + String(WiFi.RSSI()) +
+                     ",\"runtime\":" + String(start - millis() + 800) + "}";
   
     Serial.print("POST data to URL: ");
     Serial.print(hubIp);

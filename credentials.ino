@@ -1,3 +1,5 @@
+#include "wifitemp.h"
+
 /** Load WLAN credentials from EEPROM */
 void loadCredentials() {
   EEPROM.begin(512);
