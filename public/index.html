@@ -23,6 +23,7 @@
       #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
       #latest { color: rgba(0,0,0,0.4); text-align: center; font-size: 32px; }
       #execTime { color: rgba(0,0,0,0.2); text-align: center; font-size: 10px; }
+      #batteryLife { color: rgba(0,0,0,0.2); text-align: center; font-size: 10px; }
       .warning { background-color: red; width: 100%; text-align: center; font-size: 28px; margin-left: 20%; width: 60%; border-radius: 10px; }
       .chart { width: 100%; }
       .wrapper { display: grid; grid-template-columns: 50% 50%; grid-gap: 10px; }
@@ -48,6 +49,7 @@
       <select id="sensors" onchange="changeSensor()"></select>
       <span id="latest"></span>
       <span id="execTime"></span>
+      <span id="batteryLife"></span>
     </div>
     <p id="batteryWarning" class="warning"></p>
     <p id="reportWarning" class="warning"></p>

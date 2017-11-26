@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (temp.names[sensorId] && temp.names[sensorId].name) {
           name = temp.names[sensorId].name;
         }
-        var sensor = {id: sensorId, name: name, warnings: {}, avgExecutionTime: 0};
+        var sensor = {id: sensorId, name: name, warnings: {}, avgExecutionTime: 0, avgBatteryLife: 0};
 
         var option = document.createElement('option');
         option.text = sensor.name;
@@ -101,6 +101,9 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
   var voltage = [];
   var signal = [];
   var i = -1;
+  var batteryLifeStart = 0;
+  var batteryLifeEnd = 0;
+  var batteryLife = [];
   var minTemp = 100;
   var maxTemp = -100;
   var sumExecTime = 0;
@@ -109,6 +112,20 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
     i++;
     var date = temp[sensorId][id].time;
     var diff = now - date;
+    var currentVoltage = temp[sensorId][id].voltage;
+    var currentSignal = temp[sensorId][id].signal;
+    var currentTemperature = temp[sensorId][id].temperature;
+    if (currentVoltage > 3.85 && batteryLifeStart === 0) {
+      batteryLifeStart = date;
+    }
+    if (currentVoltage < 3 && batteryLifeEnd === 0) {
+      batteryLifeEnd = date;
+    }
+    if (batteryLifeStart > 0 && batteryLifeEnd > 0) {
+      batteryLife.push(batteryLifeEnd - batteryLifeStart);
+      batteryLifeEnd = 0;
+      batteryLifeStart = 0;
+    }
     if (diff > timeLimit && Object.keys(temp[sensorId]).length > 10) {
       continue;
     } else {
@@ -127,20 +144,18 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
       }
       tempChartData.labels.push(stringDate);
       voltageChartData.labels.push(stringDate);
-      voltage.push({meta: m.format('lll'), value: Math.round(temp[sensorId][id].voltage * 100) / 100 });
-      if (temp[sensorId][id].signal) {
-        signal.push({meta: m.format('lll'), value: temp[sensorId][id].signal });
-        signalChartData.labels.push(stringDate);
+      voltage.push({meta: m.format('lll'), value: Math.round(currentVoltage * 100) / 100 });
+      signal.push({meta: m.format('lll'), value: currentSignal });
+      signalChartData.labels.push(stringDate);
+      temperature.push({meta: m.format('lll'), value: Math.round(currentTemperature * 10) / 10 });
+      if (currentTemperature > maxTemp) {
+        maxTemp = currentTemperature;
       }
-      temperature.push({meta: m.format('lll'), value: Math.round(temp[sensorId][id].temperature * 10) / 10 });
-      if (temp[sensorId][id].temperature > maxTemp) {
-        maxTemp = temp[sensorId][id].temperature;
-      }
-      if (temp[sensorId][id].temperature < minTemp) {
-        minTemp = temp[sensorId][id].temperature;
+      if (currentTemperature < minTemp) {
+        minTemp = currentTemperature;
       }
       if (i == Object.keys(temp[sensorId]).length - 1) {
-        if (temp[sensorId][id].voltage < 3.0) {
+        if (voltage < 3.0) {
           sensor.warnings.battery = true;
         }
         if (now - date > 60*60*1000) {
@@ -150,6 +165,15 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
     }
   }
   sensor.avgExecutionTime = Math.round((sumExecTime / countExecTime) * 10) / 10;
+  if (batteryLife.length > 0) {
+    var sum = batteryLife.reduce(function(total, num) { return total + num; })
+    var lifeMillis = sum / batteryLife.length;
+    if (batteryLifeStart) {
+      var lifeLeftMillis = lifeMillis - (Date.now() - batteryLifeStart);
+      sensor.lifeLeft = Math.round((lifeLeftMillis / 3600000) * 10) / 10;
+    }
+    sensor.avgBatteryLife = Math.round(((sum / batteryLife.length) / 3600000) * 10) / 10;
+  }
   tempChartSettings.low = minTemp - 5;
   tempChartSettings.high = maxTemp + 4;
   tempChartData.series.push(temperature);
@@ -166,6 +190,7 @@ function updateDom() {
   var currentDate = labels[labels.length - 1];
   document.getElementById('latest').innerHTML = ' ' + current.value + ' °C, ' + currentDate;
   document.getElementById('execTime').innerHTML = sensorList[currentSensorIndex].avgExecutionTime + ' ms';
+  document.getElementById('batteryLife').innerHTML = sensorList[currentSensorIndex].lifeLeft + '/' + sensorList[currentSensorIndex].avgBatteryLife + ' h';
   if (sensorList[currentSensorIndex].warnings.battery) {
     document.getElementById('batteryWarning').innerHTML = sensorList[currentSensorIndex].name + ' behöver laddas.';
   } else {
