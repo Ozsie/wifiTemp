@@ -10,7 +10,7 @@ var voltageChartSettings = {
       return index % 3  === 0 ? value : null;
     }
   },
-  low: 0,
+  low: 2.5,
   high: 4,
   plugins: [
     Chartist.plugins.tooltip({anchorToPoint: true})
@@ -24,7 +24,7 @@ var signalChartSettings = {
     }
   },
   low: -90,
-  high: -20,
+  high: -40,
   plugins: [
     Chartist.plugins.tooltip({anchorToPoint: true})
   ]
@@ -177,8 +177,8 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
     }
     sensor.avgBatteryLife = Math.round(((sum / batteryLife.length) / 3600000) * 10) / 10;
   }
-  tempChartSettings.low = minTemp - 5;
-  tempChartSettings.high = maxTemp + 4;
+  tempChartSettings.low = minTemp - 4;
+  tempChartSettings.high = maxTemp + 2;
   tempChartData.series.push(temperature);
   voltageChartData.series.push(voltage);
   signalChartData.series.push(signal);
@@ -192,8 +192,8 @@ function updateDom() {
   var labels = sensorList[currentSensorIndex].tempChartData.labels;
   var currentDate = labels[labels.length - 1];
   document.getElementById('latest').innerHTML = ' ' + current.value + ' °C, ' + currentDate;
-  document.getElementById('execTime').innerHTML = sensorList[currentSensorIndex].avgExecutionTime + ' ms';
-  document.getElementById('batteryLife').innerHTML = sensorList[currentSensorIndex].lifeLeft + '/' + sensorList[currentSensorIndex].avgBatteryLife + ' h';
+  document.getElementById('execTime').innerHTML = sensorList[currentSensorIndex].avgExecutionTime + ' ms / exekvering';
+  document.getElementById('batteryLife').innerHTML = sensorList[currentSensorIndex].lifeLeft + '/' + sensorList[currentSensorIndex].avgBatteryLife + ' h battertid';
   if (sensorList[currentSensorIndex].warnings.battery) {
     document.getElementById('batteryWarning').innerHTML = sensorList[currentSensorIndex].name + ' behöver laddas.';
   } else {

@@ -24,6 +24,7 @@
       #latest { color: rgba(0,0,0,0.4); text-align: center; font-size: 32px; }
       #execTime { color: rgba(0,0,0,0.2); text-align: center; font-size: 10px; }
       #batteryLife { color: rgba(0,0,0,0.2); text-align: center; font-size: 10px; }
+      .bonusData { margin-left: 5%; }
       .warning { background-color: red; width: 100%; text-align: center; font-size: 28px; margin-left: 20%; width: 60%; border-radius: 10px; }
       .chart { width: 100%; }
       .wrapper { display: grid; grid-template-columns: 50% 50%; grid-gap: 10px; }
@@ -48,6 +49,8 @@
     <div class="select">
       <select id="sensors" onchange="changeSensor()"></select>
       <span id="latest"></span>
+    </div>
+    <div class="bonusData">
       <span id="execTime"></span>
       <span id="batteryLife"></span>
     </div>
