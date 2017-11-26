@@ -30,6 +30,18 @@ var signalChartSettings = {
   ]
 };
 
+var execTimeChartSettings = {
+  axisX: {
+    labelInterpolationFnc: function skipLabels(value, index) {
+      return index % 3  === 0 ? value : null;
+    }
+  },
+  low: 3000,
+  plugins: [
+    Chartist.plugins.tooltip({anchorToPoint: true})
+  ]
+};
+
 var tempChartSettings = {
   axisX: {
     labelInterpolationFnc: function skipLabels(value, index) {
@@ -81,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sensor.tempChartData = chartData.t;
         sensor.voltageChartData = chartData.v;
         sensor.signalChartData = chartData.s;
+        sensor.execTimeChartData = chartData.e;
         sensorList.push(sensor);
       }
       if (currentSensorIndex > sensorList.length - 1) {
@@ -100,9 +113,11 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
   tempChartData = { labels: [], series: [] };
   voltageChartData = { labels: [], series: [] };
   signalChartData = { labels: [], series: [] };
+  execTimeChartData = { labels: [], series: [] };
   var temperature = [];
   var voltage = [];
   var signal = [];
+  var exec = [];
   var i = -1;
   var batteryLifeStart = 0;
   var batteryLifeEnd = 0;
@@ -118,6 +133,8 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
     var currentVoltage = temp[sensorId][id].voltage;
     var currentSignal = temp[sensorId][id].signal;
     var currentTemperature = temp[sensorId][id].temperature;
+    var currentExecTime = temp[sensorId][id].runtime;
+
     if (currentVoltage > 3.85 && batteryLifeStart === 0) {
       batteryLifeStart = date;
     }
@@ -129,6 +146,7 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
       batteryLifeEnd = 0;
       batteryLifeStart = 0;
     }
+
     if (diff > timeLimit && Object.keys(temp[sensorId]).length > 10) {
       continue;
     } else {
@@ -139,51 +157,72 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
       }
       sumExecTime += temp[sensorId][id].runtime;
       countExecTime++;
-      var stringDate;
-      if (m.isBetween(moment().startOf('day'), moment().startOf('day').minute(30))) {
-        stringDate = m.format('lll');
-      } else {
-        stringDate = m.format('LT');
-      }
-      tempChartData.labels.push(stringDate);
-      voltageChartData.labels.push(stringDate);
-      voltage.push({meta: m.format('lll'), value: Math.round(currentVoltage * 100) / 100 });
-      signal.push({meta: m.format('lll'), value: currentSignal });
-      signalChartData.labels.push(stringDate);
-      temperature.push({meta: m.format('lll'), value: Math.round(currentTemperature * 10) / 10 });
+      var stringDate = getStringDate(m);
+
       if (currentTemperature > maxTemp) {
         maxTemp = currentTemperature;
       }
       if (currentTemperature < minTemp) {
         minTemp = currentTemperature;
       }
-      if (i == Object.keys(temp[sensorId]).length - 1) {
-        if (voltage < 3.0) {
-          sensor.warnings.battery = true;
-        }
-        if (now - date > 60*60*1000) {
-          sensor.warnings.noReport = true;
-        }
-      }
+
+      tempChartData.labels.push(stringDate);
+      temperature.push({meta: m.format('lll'), value: Math.round(currentTemperature * 10) / 10 });
+
+      voltageChartData.labels.push(stringDate);
+      voltage.push({meta: m.format('lll'), value: Math.round(currentVoltage * 100) / 100 });
+
+      signalChartData.labels.push(stringDate);
+      signal.push({meta: m.format('lll'), value: currentSignal });
+
+      execTimeChartData.labels.push(stringDate);
+      exec.push({meta: m.format('lll'), value: currentExecTime });
+
+      sensor.warnings = checkWarningSigns(i, temp, sensorId, diff);
     }
   }
   sensor.avgExecutionTime = Math.round((sumExecTime / countExecTime) * 10) / 10;
   if (batteryLife.length > 0) {
-    var sum = batteryLife.reduce(function(total, num) { return total + num; })
-    var lifeMillis = sum / batteryLife.length;
     if (batteryLifeStart) {
-      var lifeLeftMillis = lifeMillis - (Date.now() - batteryLifeStart);
-      sensor.lifeLeft = Math.round((lifeLeftMillis / 3600000) * 10) / 10;
+      sensor.lifeLeft = calculateLifeLeft(batteryLife, batteryLifeStart);
     }
-    sensor.avgBatteryLife = Math.round(((sum / batteryLife.length) / 3600000) * 10) / 10;
+    sensor.avgBatteryLife = calculateAverageBatteryLife(batteryLife);
   }
   tempChartSettings.low = minTemp - 4;
   tempChartSettings.high = maxTemp + 2;
   tempChartData.series.push(temperature);
   voltageChartData.series.push(voltage);
   signalChartData.series.push(signal);
+  execTimeChartData.series.push(exec);
 
-  return {v: voltageChartData, t: tempChartData, s: signalChartData};
+  return {v: voltageChartData, t: tempChartData, s: signalChartData, e: execTimeChartData};
+}
+
+function checkWarningSigns(i, temp, sensorId, diff) {
+  var warnings = {};
+  if (i == Object.keys(temp[sensorId]).length - 1) {
+    if (voltage < 3.0) {
+      warnings.battery = true;
+    }
+    if (diff> 60*60*1000) {
+      warnings.noReport = true;
+    }
+  }
+
+  return warnings;
+}
+
+function calculateLifeLeft(batteryLife, batteryLifeStart) {
+  var sum = batteryLife.reduce(function(total, num) { return total + num; })
+  var lifeMillis = sum / batteryLife.length;
+  var lifeLeftMillis = lifeMillis - (Date.now() - batteryLifeStart);
+  return Math.round((lifeLeftMillis / 3600000) * 10) / 10;
+}
+
+function calculateAverageBatteryLife(batteryLife) {
+  var sum = batteryLife.reduce(function(total, num) { return total + num; })
+  var lifeMillis = sum / batteryLife.length;
+  return Math.round(((sum / batteryLife.length) / 3600000) * 10) / 10;
 }
 
 function updateDom() {
@@ -207,9 +246,19 @@ function updateDom() {
   document.getElementById('temp').innerHTML = 'Temperatur';
   document.getElementById('volt').innerHTML = 'Spänning';
   document.getElementById('sig').innerHTML = 'Signalstyrka';
+  document.getElementById('exec').innerHTML = 'Exekveringstid';
   new Chartist.Line('#temperature', sensorList[currentSensorIndex].tempChartData, tempChartSettings);
   new Chartist.Line('#voltage', sensorList[currentSensorIndex].voltageChartData, voltageChartSettings);
   new Chartist.Line('#signal', sensorList[currentSensorIndex].signalChartData, signalChartSettings);
+  new Chartist.Line('#execTimeChart', sensorList[currentSensorIndex].execTimeChartData, execTimeChartSettings);
+}
+
+function getStringDate(m) {
+  if (m.isBetween(moment().startOf('day'), moment().startOf('day').minute(30))) {
+    return m.format('lll');
+  } else {
+    return m.format('LT');
+  }
 }
 
 function changeSensor() {
@@ -223,3 +272,10 @@ function changeSensor() {
     }
   }
 };
+
+function showExecTimeGraph() {
+  var newStyle;
+  var element = document.getElementById('execBox');
+  element.style.visibility === ('hidden' || '') ? newStyle = 'hidden' : newStyle = 'visible';
+  element.style.visibility = newStyle;
+}

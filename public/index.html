@@ -29,17 +29,19 @@
       .chart { width: 100%; }
       .wrapper { display: grid; grid-template-columns: 50% 50%; grid-gap: 10px; }
       .box { border-radius: 5px; padding: 20px; }
-  	  .a { grid-column: 1 ; grid-row: 1 / span 2; }
+  	  .a { grid-column: 1; grid-row: 1 / span 3; }
       .b { grid-column: 2 / span 1; }
-	    .c { grid-column: 2 ; grid-row: 2; }
+	    .c { grid-column: 2; grid-row: 2; }
+	    .d { grid-column: 2; grid-row: 3; visibility: hidden; }
       .select select { margin-left: 5%; font-size: 32px; border-radius: 5px; padding: 40px; background-color: #3b8ec2; color: #fff;}
 
       @media (max-width: 750px) {
         body { margin-top: 0; }
-        .wrapper { grid-template-columns: 100%; }
-        .a { grid-column: 1 ; grid-row: 1 / span 1; }
-        .b { grid-column: 1 / span 1; }
-        .c { grid-column: 1 ; grid-row: 2; }
+        .wrapper { display: grid; grid-template-columns: 100%; }
+        .a { grid-column: 1; grid-row: 1; }
+        .b { grid-column: 1 / span 1 }
+        .c { grid-column: 1; grid-row: 3; }
+        .d { grid-column: 1; grid-row: 4; visibility: hidden; }
       }
     </style>
   </head>
@@ -51,7 +53,7 @@
       <span id="latest"></span>
     </div>
     <div class="bonusData">
-      <span id="execTime"></span>
+      <span id="execTime" onclick="showExecTimeGraph()"></span>
       <span id="batteryLife"></span>
     </div>
     <p id="batteryWarning" class="warning"></p>
@@ -69,6 +71,10 @@
       <div class="box c">
         <p id="sig"></p>
         <div id="signal" class="ct-chart ct-double-octave"></div>
+      </div>
+      <div class="box d" id="execBox">
+        <p id="exec"></p>
+        <div id="execTimeChart" class="ct-chart ct-double-octave"></div>
       </div>
     </div>
   </body>
