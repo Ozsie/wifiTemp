@@ -83,6 +83,9 @@ document.addEventListener('DOMContentLoaded', function() {
         sensor.signalChartData = chartData.s;
         sensorList.push(sensor);
       }
+      if (currentSensorIndex > sensorList.length - 1) {
+        currentSensorIndex = sensorList.length - 1;
+      }
       sensorSelectBox.value = sensorList[currentSensorIndex].id
       updateDom();
     });
