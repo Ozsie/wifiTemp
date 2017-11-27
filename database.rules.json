@@ -5,20 +5,24 @@
       ".write": "false"
     },
     "1234": {
-      ".read": "true",
+      ".read": "data.child('time').val() > (now - 2419200000)",
       ".write": "true",
       "$post": {
-        ".validate": "newData.hasChildren(['voltage', 'temperature', 'signal']) && newData.child('signal').isNumber() && newData.child('voltage').isNumber() && newData.child('temperature').isNumber()"
-      }
+        ".validate": "newData.hasChildren(['voltage', 'temperature', 'signal']) && newData.child('signal').isNumber() && newData.child('voltage').isNumber() && newData.child('temperature').isNumber()",
+        ".read": "data.child('time').val() > (now - 2419200000)"
+      },
+      ".indexOn": ["time"]
     },
     "2854273": {
-      ".read": "true",
+      ".read": "data.child('time').val() > (now - 2419200000)",
       ".write": "true",
       "$post": {
-        ".validate": "newData.hasChildren(['voltage', 'temperature', 'signal']) && newData.child('signal').isNumber() && newData.child('voltage').isNumber() && newData.child('temperature').isNumber()"
-      }
+        ".validate": "newData.hasChildren(['voltage', 'temperature', 'signal']) && newData.child('signal').isNumber() && newData.child('voltage').isNumber() && newData.child('temperature').isNumber()",
+        ".read": "data.child('time').val() > (now - 2419200000)"
+      },
+      ".indexOn": ["time"]
     },
-    ".read": "true",
+    ".read": "data.child('time').val() > (now - 2419200000)",
     ".write": "false"
   }
 }

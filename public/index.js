@@ -1,7 +1,5 @@
 var currentSensorIndex = 0;
-if (window.localStorage.getItem("currentSensorIndex")) {
-  currentSensorIndex = window.localStorage.getItem("currentSensorIndex");
-}
+
 var sensorList = [];
 
 var voltageChartSettings = {
@@ -55,54 +53,78 @@ var tempChartSettings = {
 
 var summarize = function(total, num) { return total + num; };
 
+function addOption(sensorId, sensor) {
+  var sensorSelectBox = document.getElementById('sensors');
+  var option = document.createElement('option');
+  option.text = sensor.name;
+  option.value = sensorId;
+  sensorSelectBox.add(option);
+}
+
+function clear() {
+  var sensorSelectBox = document.getElementById('sensors');
+  for(var i = sensorSelectBox.options.length - 1; i >= 0; i--) {
+    sensorSelectBox.remove(i);
+  }
+  sensorList = [];
+}
+
+function selectCorrectOption() {
+  if (window.localStorage.getItem("currentSensorIndex")) {
+    currentSensorIndex = window.localStorage.getItem("currentSensorIndex");
+
+    if (currentSensorIndex > sensorList.length - 1) {
+      currentSensorIndex = sensorList.length - 1;
+    }
+    var sensorSelectBox = document.getElementById('sensors');
+    sensorSelectBox.value = sensorList[currentSensorIndex].id
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   try {
     let app = firebase.app();
     document.getElementById('load').innerHTML = '';
 
-    firebase.database().ref('/').on('value', snapshot => {
-      var tempChartData = { labels: [], series: [] };
-      var voltageChartData = { labels: [], series: [] };
-      var temp = snapshot.val();
-      var sensorSelectBox = document.getElementById('sensors');
-      var i;
-      for(i = sensorSelectBox.options.length - 1; i >= 0; i--) {
-          sensorSelectBox.remove(i);
-      }
-      sensorList = [];
+    firebase.database().ref('/sensors').on('value', snapshot => {
+      var sensors = snapshot.val();
+      clear();
 
-      for (var sensorId in temp) {
-        if (sensorId === 'names') {
-          continue;
-        }
-        var name = sensorId;
-        if (temp.names[sensorId] && temp.names[sensorId].name) {
-          name = temp.names[sensorId].name;
-        }
-        var sensor = {id: sensorId, name: name, warnings: {}, avgExecutionTime: 0, avgBatteryLife: 0};
+      for (var sensorId in sensors) {
+        addOption(sensorId, sensors[sensorId]);
 
-        var option = document.createElement('option');
-        option.text = sensor.name;
-        option.value = sensorId;
-        sensorSelectBox.add(option);
+        firebase.database().ref('/' + sensorId).orderByChild('time').startAt(Date.now() - 4*7*24*60*60*1000).on('value', data => {
+          const sensorData = data.val()
+          if (!sensorData) {
+            select.removeChild(data.key);
+          } else {
+            var name = sensors[data.key].name;
+            var sensor = {
+              id: data.key,
+              name: sensors[data.key].name,
+              warnings: {},
+              avgExecutionTime: sensors[data.key].avgExecutionTime,
+              avgVoltageDrop: sensors[data.key].avgVoltageDrop,
+              avgBatteryLife: 0
+            };
 
-        chartData = buildArrays(temp, sensorId, sensor, (12*60*60*1000));
-        var attempts = 1;
-        while (chartData.t.series[0].length === 0 && attempts <= 5) {
-          chartData = buildArrays(temp, sensorId, sensor, ((12 + (attempts * 2))*60*60*1000))
-          attempts++;
-        }
-        sensor.tempChartData = chartData.t;
-        sensor.voltageChartData = chartData.v;
-        sensor.signalChartData = chartData.s;
-        sensor.execTimeChartData = chartData.e;
-        sensorList.push(sensor);
+            chartData = buildArrays(sensorData, data.key, sensor, (12*60*60*1000));
+            var attempts = 1;
+            while (chartData.t.series[0].length === 0 && attempts <= 5) {
+              chartData = buildArrays(sensorData, data.key, sensor, ((12 + (attempts * 2))*60*60*1000))
+              attempts++;
+            }
+            sensor.tempChartData = chartData.t;
+            sensor.voltageChartData = chartData.v;
+            sensor.signalChartData = chartData.s;
+            sensor.execTimeChartData = chartData.e;
+            sensorList.push(sensor);
+
+            selectCorrectOption();
+            updateDom();
+          }
+        });
       }
-      if (currentSensorIndex > sensorList.length - 1) {
-        currentSensorIndex = sensorList.length - 1;
-      }
-      sensorSelectBox.value = sensorList[currentSensorIndex].id
-      updateDom();
     });
   } catch (e) {
     console.error(e);
@@ -110,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-function buildArrays(temp, sensorId, sensor, timeLimit) {
+function buildArrays(sensorData, sensorId, sensor, timeLimit) {
   var now = Date.now();
   tempChartData = { labels: [], series: [] };
   voltageChartData = { labels: [], series: [] };
@@ -122,26 +144,26 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
   var exec = [];
   var i = -1;
   var previousVoltage = 0;
-  var voltageDrops = [];
   var maxVoltage = 0;
   var batteryLifeStart = 0;
   var batteryLifeEnd = 0;
   var batteryLife = [];
   var minTemp = 100;
   var maxTemp = -100;
-  var sumExecTime = 0;
-  var countExecTime = 0 ;
-  for (id in temp[sensorId]) {
+  for (id in sensorData) {
     i++;
-    var date = temp[sensorId][id].time;
+    var date = sensorData[id].time;
     var diff = now - date;
-    var currentVoltage = temp[sensorId][id].voltage;
-    var currentSignal = temp[sensorId][id].signal;
-    var currentTemperature = temp[sensorId][id].temperature;
-    var currentExecTime = temp[sensorId][id].runtime;
+    var currentVoltage = sensorData[id].voltage;
+    var currentSignal = sensorData[id].signal;
+    var currentTemperature = sensorData[id].temperature;
+    var currentExecTime = sensorData[id].runtime;
+
+    if (currentVoltage > maxVoltage) {
+      maxVoltage = currentVoltage;
+    }
 
     if (currentVoltage > 3.85 && batteryLifeStart === 0) {
-      maxVoltage = currentVoltage;
       batteryLifeStart = date;
     }
     if (currentVoltage < 3 && batteryLifeEnd === 0) {
@@ -152,14 +174,8 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
       batteryLifeEnd = 0;
       batteryLifeStart = 0;
     }
-    if (batteryLifeStart > 0 && batteryLifeEnd === 0) {
-      if (previousVoltage > 0) {
-        voltageDrops.push(previousVoltage - currentVoltage);
-      }
-      previousVoltage = currentVoltage;
-    }
 
-    if (diff > timeLimit && Object.keys(temp[sensorId]).length > 10) {
+    if (diff > timeLimit && Object.keys(sensorData).length > 10) {
       continue;
     } else {
       var m = moment(date, "x");
@@ -167,8 +183,6 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
       if (!m.isValid()) {
         continue;
       }
-      sumExecTime += temp[sensorId][id].runtime;
-      countExecTime++;
       var stringDate = getStringDate(m);
 
       if (currentTemperature > maxTemp) {
@@ -190,19 +204,19 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
       execTimeChartData.labels.push(stringDate);
       exec.push({meta: m.format('lll'), value: currentExecTime });
 
-      sensor.warnings = checkWarningSigns(i, temp, sensorId, diff);
+      sensor.warnings = checkWarningSigns(i, sensorData, sensorId, diff);
     }
   }
-  sensor.avgExecutionTime = Math.round((sumExecTime / countExecTime) * 10) / 10;
-  sensor.avgVoltageDrop = Math.round((voltageDrops.reduce(summarize) / voltageDrops.length) * 10000) / 10000;
   sensor.approximateMeasurements = Math.round(((maxVoltage - 3) / sensor.avgVoltageDrop) * 10) / 10;
   sensor.approximateDaysOfOperation = Math.round((sensor.approximateMeasurements / 48) * 10) / 10;
+
   if (batteryLife.length > 0) {
     if (batteryLifeStart) {
       sensor.lifeLeft = calculateLifeLeft(batteryLife, batteryLifeStart);
     }
     sensor.avgBatteryLife = calculateAverageBatteryLife(batteryLife);
   }
+
   tempChartSettings.low = minTemp - 4;
   tempChartSettings.high = maxTemp + 2;
   tempChartData.series.push(temperature);
@@ -213,9 +227,9 @@ function buildArrays(temp, sensorId, sensor, timeLimit) {
   return {v: voltageChartData, t: tempChartData, s: signalChartData, e: execTimeChartData};
 }
 
-function checkWarningSigns(i, temp, sensorId, diff) {
+function checkWarningSigns(i, sensorData, sensorId, diff) {
   var warnings = {};
-  if (i == Object.keys(temp[sensorId]).length - 1) {
+  if (i == Object.keys(sensorData).length - 1) {
     if (voltage < 3.0) {
       warnings.battery = true;
     }
