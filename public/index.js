@@ -69,6 +69,16 @@ function clear() {
   sensorList = [];
 }
 
+function removeOption(sensorId) {
+  var sensorSelectBox = document.getElementById('sensors');
+  for(var i = sensorSelectBox.options.length - 1; i >= 0; i--) {
+    if (sensorSelectBox.options[i].value === sensorId) {
+      sensorSelectBox.remove(i);
+      break;
+    }
+  }
+}
+
 function selectCorrectOption() {
   if (window.localStorage.getItem("currentSensorIndex")) {
     currentSensorIndex = window.localStorage.getItem("currentSensorIndex");
@@ -96,16 +106,17 @@ document.addEventListener('DOMContentLoaded', function() {
         firebase.database().ref('/' + sensorId).orderByChild('time').startAt(Date.now() - 4*7*24*60*60*1000).on('value', data => {
           const sensorData = data.val()
           if (!sensorData) {
-            select.removeChild(data.key);
+            removeOption(data.key);
           } else {
             var name = sensors[data.key].name;
             var sensor = {
               id: data.key,
               name: sensors[data.key].name,
               warnings: {},
-              avgExecutionTime: sensors[data.key].avgExecutionTime,
+              medianExecutionTime: sensors[data.key].medianExecutionTime,
               avgVoltageDrop: sensors[data.key].avgVoltageDrop,
-              avgBatteryLife: 0
+              avgBatteryLife: sensors[data.key].avgBatteryLife,
+              expectedLifeLeft: sensors[data.key].expectedLifeLeft
             };
 
             chartData = buildArrays(sensorData, data.key, sensor, (12*60*60*1000));
@@ -143,11 +154,7 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
   var signal = [];
   var exec = [];
   var i = -1;
-  var previousVoltage = 0;
   var maxVoltage = 0;
-  var batteryLifeStart = 0;
-  var batteryLifeEnd = 0;
-  var batteryLife = [];
   var minTemp = 100;
   var maxTemp = -100;
   for (id in sensorData) {
@@ -161,18 +168,6 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
 
     if (currentVoltage > maxVoltage) {
       maxVoltage = currentVoltage;
-    }
-
-    if (currentVoltage > 3.85 && batteryLifeStart === 0) {
-      batteryLifeStart = date;
-    }
-    if (currentVoltage < 3 && batteryLifeEnd === 0) {
-      batteryLifeEnd = date;
-    }
-    if (batteryLifeStart > 0 && batteryLifeEnd > 0) {
-      batteryLife.push(batteryLifeEnd - batteryLifeStart);
-      batteryLifeEnd = 0;
-      batteryLifeStart = 0;
     }
 
     if (diff > timeLimit && Object.keys(sensorData).length > 10) {
@@ -210,13 +205,6 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
   sensor.approximateMeasurements = Math.round(((maxVoltage - 3) / sensor.avgVoltageDrop) * 10) / 10;
   sensor.approximateDaysOfOperation = Math.round((sensor.approximateMeasurements / 48) * 10) / 10;
 
-  if (batteryLife.length > 0) {
-    if (batteryLifeStart) {
-      sensor.lifeLeft = calculateLifeLeft(batteryLife, batteryLifeStart);
-    }
-    sensor.avgBatteryLife = calculateAverageBatteryLife(batteryLife);
-  }
-
   tempChartSettings.low = minTemp - 4;
   tempChartSettings.high = maxTemp + 2;
   tempChartData.series.push(temperature);
@@ -241,28 +229,16 @@ function checkWarningSigns(i, sensorData, sensorId, diff) {
   return warnings;
 }
 
-function calculateLifeLeft(batteryLife, batteryLifeStart) {
-  var sum = batteryLife.reduce(summarize);
-  var lifeMillis = sum / batteryLife.length;
-  var lifeLeftMillis = lifeMillis - (Date.now() - batteryLifeStart);
-  return Math.round((lifeLeftMillis / 3600000) * 10) / 10;
-}
-
-function calculateAverageBatteryLife(batteryLife) {
-  var sum = batteryLife.reduce(summarize);
-  var lifeMillis = sum / batteryLife.length;
-  return Math.round(((sum / batteryLife.length) / 3600000) * 10) / 10;
-}
-
 function updateDom() {
   var series = sensorList[currentSensorIndex].tempChartData.series[0];
   var current = series[series.length - 1];
   var labels = sensorList[currentSensorIndex].tempChartData.labels;
   var currentDate = labels[labels.length - 1];
+  var avgBatteryLife = Math.round((sensorList[currentSensorIndex].avgBatteryLife / 3600000) * 1000) / 1000;
+  var expectedLifeLeft = Math.round((sensorList[currentSensorIndex].expectedLifeLeft / 3600000) * 1000) / 1000;
   document.getElementById('latest').innerHTML = ' ' + current.value + ' °C, ' + currentDate;
-  document.getElementById('execTime').innerHTML = sensorList[currentSensorIndex].avgExecutionTime + ' ms / exekvering';
-  document.getElementById('batteryLife').innerHTML = sensorList[currentSensorIndex].lifeLeft + '/' +
-                                                     sensorList[currentSensorIndex].avgBatteryLife + ' h battertid';
+  document.getElementById('execTime').innerHTML = sensorList[currentSensorIndex].medianExecutionTime + ' ms / exekvering';
+  document.getElementById('batteryLife').innerHTML = expectedLifeLeft + '/' + avgBatteryLife + ' h battertid';
   document.getElementById('voltageChange').innerHTML = sensorList[currentSensorIndex].avgVoltageDrop + ' V/mätning > ' +
                                                        sensorList[currentSensorIndex].approximateMeasurements +
                                                        ' mätningar > ' + sensorList[currentSensorIndex].approximateDaysOfOperation +
