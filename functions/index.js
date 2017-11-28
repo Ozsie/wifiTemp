@@ -33,12 +33,13 @@ var addTimeStamp = function(event) {
 };
 
 var calculateMedianExecutionTime = function(sensorId) {
-  return admin.database().ref('/' + sensorId).orderByChild('runtime').startAt(Date.now() - 1*7*24*60*60*1000).once('value').then(function(snapshot) {
+  return admin.database().ref('/' + sensorId).orderByChild('time').startAt(Date.now() - 1*7*24*60*60*1000).once('value').then(function(snapshot) {
     var execTimes = [];
     const sensorData = snapshot.val();
     for (var id in sensorData) {
       execTimes.push(sensorData[id].runtime);
     }
+    execTimes.sort((a, b) => a - b);
     var lowMiddle = Math.floor((execTimes.length - 1) / 2);
     var highMiddle = Math.ceil((execTimes.length - 1) / 2);
     var medianExecutionTime = (execTimes[lowMiddle] + execTimes[highMiddle]) / 2;
