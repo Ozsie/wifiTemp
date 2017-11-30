@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
       for (var sensorId in sensors) {
         addOption(sensorId, sensors[sensorId]);
 
-        firebase.database().ref('/' + sensorId).orderByChild('time').startAt(Date.now() - 4*7*24*60*60*1000).on('value', data => {
+        firebase.database().ref('/' + sensorId).orderByChild('time').startAt(Date.now() - 4*7*24*60*60*1000).once('value', data => {
           const sensorData = data.val()
           if (!sensorData) {
             removeOption(data.key);

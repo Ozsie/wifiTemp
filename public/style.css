@@ -103,10 +103,31 @@ body {
 	padding: 20px;
 }
 
+.content {
+  margin-top: 150px;
+}
+
+.header {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  background: #ECEFF1;
+  overflow: hidden;
+}
+
+svg{
+  pointer-events: none;
+  overflow:hidden
+}
+
 .menu {
 	border-width: 1px;
 	border-color: rgba(0,0,0,0.2);
 	border-style: solid hidden solid hidden;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #ECEFF1;
 }
 
 @media (max-width: 750px) {
@@ -139,12 +160,16 @@ body {
 		grid-row: 4;
 		visibility: hidden;
 	}
-.boxLeft {
-	border-radius: 5px;
-	padding: 5px 5px 5px 5px;
-}
-.boxRight {
-	border-radius: 5px;
-	padding: 5px 5px 5px 5px;
-}
+  .boxLeft {
+    border-radius: 5px;
+    padding: 5px 5px 5px 5px;
+  }
+  .boxRight {
+    border-radius: 5px;
+    padding: 5px 5px 5px 5px;
+  }
+
+  .content {
+    margin-top: 110px;
+  }
 }

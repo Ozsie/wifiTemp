@@ -25,31 +25,35 @@
   <body>
     <script src="index.js"></script>
     <p id="load" class="text-prominent">Laddar</p>
-    <div id="latest" class="text-prominent"></div>
-    <div id="currentSensor" class="text-prominent"></div>
-    <div class="currentWrapper">
-      <div class="currentBox text-weak" id="execTime" onclick="showExecTimeGraph()"></div>
-      <div class="currentBox text-weak" id="voltageChange"></div>
+    <div class="header">
+      <div id="latest" class="text-prominent"></div>
+      <div id="currentSensor" class="text-prominent"></div>
+      <div class="currentWrapper">
+        <div class="currentBox text-weak" id="execTime" onclick="showExecTimeGraph()"></div>
+        <div class="currentBox text-weak" id="voltageChange"></div>
+      </div>
     </div>
-    <p id="batteryWarning" class="warning"></p>
-    <p id="reportWarning" class="warning"></p>
-    <p id="sensor"></p>
-    <div class="wrapper">
-      <div class="boxLeft a">
-        <p id="temp"></p>
-        <div id="temperature" class="ct-chart ct-golden-section"></div>
-      </div>
-      <div class="boxRight b">
-        <p id="volt"></p>
-        <div id="voltage" class="ct-chart ct-double-octave"></div>
-      </div>
-      <div class="boxRight c">
-        <p id="sig"></p>
-        <div id="signal" class="ct-chart ct-double-octave"></div>
-      </div>
-      <div class="boxRight d hidden" id="execBox">
-        <p id="exec" class="hidden"></p>
-        <div id="execTimeChart" class="ct-chart ct-double-octave hidden"></div>
+    <div class="content">
+      <p id="batteryWarning" class="warning"></p>
+      <p id="reportWarning" class="warning"></p>
+      <p id="sensor"></p>
+      <div class="wrapper">
+        <div class="boxLeft a">
+          <p id="temp"></p>
+          <div id="temperature" class="ct-chart ct-golden-section"></div>
+        </div>
+        <div class="boxRight b">
+          <p id="volt"></p>
+          <div id="voltage" class="ct-chart ct-double-octave"></div>
+        </div>
+        <div class="boxRight c">
+          <p id="sig"></p>
+          <div id="signal" class="ct-chart ct-double-octave"></div>
+        </div>
+        <div class="boxRight d hidden" id="execBox">
+          <p id="exec" class="hidden"></p>
+          <div id="execTimeChart" class="ct-chart ct-double-octave hidden"></div>
+        </div>
       </div>
     </div>
     <div class="pure-menu pure-menu-horizontal pure-menu-scrollable menu">
