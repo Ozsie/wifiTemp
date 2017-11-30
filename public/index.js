@@ -208,7 +208,7 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
       execTimeChartData.labels.push(stringDate);
       exec.push({meta: m.format('lll'), value: currentExecTime });
 
-      sensor.warnings = checkWarningSigns(i, sensorData, sensorId, diff);
+      sensor.warnings = checkWarningSigns(i, sensorData, sensorId, currentVoltage, diff);
     }
   }
 
@@ -222,8 +222,9 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
   return {v: voltageChartData, t: tempChartData, s: signalChartData, e: execTimeChartData};
 }
 
-function checkWarningSigns(i, sensorData, sensorId, diff) {
+function checkWarningSigns(i, sensorData, sensorId, voltage, diff) {
   var warnings = {};
+  // Is this the last data point?
   if (i == Object.keys(sensorData).length - 1) {
     if (voltage < 3.0) {
       warnings.battery = true;
@@ -250,15 +251,21 @@ function updateDom() {
                                                        sensorList[currentSensorIndex].measurementsLeft + ' mätningar kvar | ' +
                                                        sensorList[currentSensorIndex].hoursLeft + ' h kvar av ' +
                                                        sensorList[currentSensorIndex].maxLife + ' h';
+  var batteryWarning = document.getElementById('batteryWarning');
+  var reportWarning = document.getElementById('reportWarning');
   if (sensorList[currentSensorIndex].warnings.battery) {
-    document.getElementById('batteryWarning').innerHTML = sensorList[currentSensorIndex].name + ' behöver laddas.';
+    batteryWarning.classList.remove("hidden");
+    batteryWarning.classList.add("visible");
   } else {
-    document.getElementById('batteryWarning').innerHTML = '';
+    batteryWarning.classList.remove("visible");
+    batteryWarning.classList.add("hidden");
   }
   if (sensorList[currentSensorIndex].warnings.noReport) {
-    document.getElementById('reportWarning').innerHTML = sensorList[currentSensorIndex].name + ' har inte rapporterat i tid.';
+    reportWarning.classList.remove("hidden");
+    reportWarning.classList.add("visible");
   } else {
-    document.getElementById('reportWarning').innerHTML = '';
+    reportWarning.classList.remove("visible");
+    reportWarning.classList.add("hidden");
   }
   document.getElementById('temp').innerHTML = 'Temperatur';
   document.getElementById('volt').innerHTML = 'Spänning';
@@ -292,6 +299,12 @@ function changeSensor(selected) {
 function showExecTimeGraph() {
   var newStyle;
   var element = document.getElementById('execBox');
-  element.style.visibility === ('hidden' || '') ? newStyle = 'hidden' : newStyle = 'visible';
-  element.style.visibility = newStyle;
+  if (element.classList.contains('hidden')) {
+    element.classList.remove('hidden');
+    element.classList.add('visible');
+    new Chartist.Line('#execTimeChart', sensorList[currentSensorIndex].execTimeChartData, execTimeChartSettings);
+  } else {
+    element.classList.remove('visible');
+    element.classList.add('hidden');
+  }
 }
