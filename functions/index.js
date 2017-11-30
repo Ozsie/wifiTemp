@@ -50,72 +50,53 @@ var calculateMedianExecutionTime = function(sensorId) {
 };
 
 var calculateAverageVoltageDrop = function(sensorId) {
-  return admin.database().ref('/' + sensorId).orderByChild('time').startAt(Date.now() - 4*24*60*60*1000).once('value').then(function(snapshot) {
+  return admin.database().ref('/' + sensorId).orderByChild('time').once('value').then(function(snapshot) {
     var previousVoltage = 0;
     var voltageDrops = [];
+    var currentVoltage = 0;
+    var maxVoltage = 0;
+    var minVoltage = 5;
     const sensorData = snapshot.val();
     for (id in sensorData) {
-      var currentVoltage = sensorData[id].voltage;
-      if (previousVoltage > 0 && Math.abs(previousVoltage - currentVoltage) < 0.1) {
+      currentVoltage = sensorData[id].voltage;
+      if (currentVoltage > 5) {
+        continue;
+      }
+      if (previousVoltage > 0 && (previousVoltage - currentVoltage) > 0 && (previousVoltage - currentVoltage) < 1) {
         voltageDrops.push(previousVoltage - currentVoltage);
+      }
+      if (currentVoltage > maxVoltage) {
+        maxVoltage = currentVoltage;
+      }
+      if (currentVoltage < minVoltage) {
+        minVoltage = currentVoltage;
       }
       previousVoltage = currentVoltage;
     }
-    var avgVoltageDrop = 0;
-    if (voltageDrops.length > 0) {
-      avgVoltageDrop = Math.round((voltageDrops.reduce(summarize) / voltageDrops.length) * 10000) / 10000;
-    }
-    return admin.database().ref('/sensors/' + sensorId).child('avgVoltageDrop').set(avgVoltageDrop).then(function() {
-      return admin.database().ref('/sensors/' + sensorId).child('avgVoltageDropDataPoints').set(voltageDrops.length);
-    });
-  });
-};
-
-var calculateBatteryLife = function(sensorId) {
-
-  return admin.database().ref('/' + sensorId).orderByChild('time').once('value').then(function(snapshot) {
-    const sensorData = snapshot.val();
-    var maxVoltage = 0;
-    var maxDate;
-    var minVoltage = 2.9;
-    var minDate
-    var batteryLife = [];
-
-    for (id in sensorData) {
-      if (sensorData[id].voltage > maxVoltage) {
-        maxVoltage = sensorData[id].voltage;
-        maxDate = sensorData[id].time;
-        minVoltage = 2.9;
-      }
-      if (sensorData[id].voltage <= minVoltage) {
-        minVoltage = sensorData[id].voltage;
-        minDate = sensorData[id].time;
-      }
-
-      if (maxVoltage !== 0 && minVoltage !== 2.9) {
-        if (minDate && maxDate) {
-          batteryLife.push(minDate - maxDate);
+    return admin.database().ref('/sensors/' + sensorId).child('maxVoltage').set(maxVoltage).then(function() {
+      if (voltageDrops.length > 2) {
+        voltageDrops.sort((a, b) => a - b);
+        var avgVoltageDrop = Math.round((voltageDrops.reduce(summarize) / voltageDrops.length) * 10000) / 10000;
+        var voltsLeft = currentVoltage - minVoltage;
+        var measurementsLeft = 0;
+        var hoursLeft = 0;
+        if (voltsLeft > 0) {
+          measurementsLeft = Math.floor(voltsLeft / avgVoltageDrop);
+          hoursLeft = Math.round((measurementsLeft / 2) * 10) / 10;
         }
-        maxVoltage = 0;
+
+        return admin.database().ref('/sensors/' + sensorId).child('avgVoltageDrop').set(avgVoltageDrop).then(function() {
+          admin.database().ref('/sensors/' + sensorId).child('currentVoltage').set(currentVoltage);
+        }).then(function() {
+          admin.database().ref('/sensors/' + sensorId).child('voltsLeft').set(voltsLeft);
+        }).then(function() {
+          admin.database().ref('/sensors/' + sensorId).child('measurementsLeft').set(measurementsLeft);
+        }).then(function() {
+          admin.database().ref('/sensors/' + sensorId).child('hoursLeft').set(hoursLeft);
+        }).then(function() {
+          admin.database().ref('/sensors/' + sensorId).child('minVoltage').set(minVoltage);
+        });
       }
-    }
-
-    var lifeLeft = 0;
-    var avgBatteryLife = 0;
-
-    if (batteryLife.length > 0) {
-      if (minVoltage === 2.9) { // Current charge still has life left
-        lifeLeft = calculateLifeLeft(batteryLife, maxDate);
-      }
-      avgBatteryLife = calculateAverageBatteryLife(batteryLife);
-    }
-    if (isNaN(lifeLeft)) { lifeLeft = 0; }
-    if (isNaN(avgBatteryLife)) { avgBatteryLife = 0; }
-
-    return admin.database().ref('/sensors/' + sensorId).child('expectedLifeLeft').set(lifeLeft).then(function() {
-      return admin.database().ref('/sensors/' + sensorId).child('avgBatteryLife').set(avgBatteryLife).then(function() {
-        return admin.database().ref('/sensors/' + sensorId).child('batteryLifeDataPoints').set(batteryLife.length);
-      });
     });
   });
 };
@@ -125,12 +106,9 @@ exports.addMoreData = functions.database.ref('/{sensorId}/{pushId}').onWrite(eve
     return null;
   }
   return addTimeStamp(event).then(function() {
-    convertVoltage(event);
-  }).then(function() {
-    calculateMedianExecutionTime(event.params.sensorId);
-  }).then(function() {
-    calculateAverageVoltageDrop(event.params.sensorId);
-  }).then(function() {
-    calculateBatteryLife(event.params.sensorId);
+    return convertVoltage(event).then(function() {
+      calculateMedianExecutionTime(event.params.sensorId);
+      calculateAverageVoltageDrop(event.params.sensorId);
+    });
   });
 });
