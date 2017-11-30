@@ -133,9 +133,14 @@ svg{
   bottom: 0;
   width: 100%;
   background: #ECEFF1;
+  height: 32px;
 }
 
-@media (max-width: 750px) {
+.menu ul {
+  margin-top: -10px;
+}
+
+@media (max-width: 720px) {
 	body {
 		margin-top: 0;
 	}

@@ -57,9 +57,11 @@ var calculateAverageVoltageDrop = function(sensorId) {
     var maxVoltage = 0;
     var minVoltage = 5;
     var chargeDate = 0;
+    var currentTemperature = 0;
     const sensorData = snapshot.val();
     for (id in sensorData) {
       currentVoltage = sensorData[id].voltage;
+      currentTemperature = sensorData[id].temperature;
       if (currentVoltage > 5) {
         continue;
       }
@@ -106,6 +108,8 @@ var calculateAverageVoltageDrop = function(sensorId) {
           admin.database().ref('/sensors/' + sensorId).child('chargeDate').set(chargeDate);
         }).then(function() {
           admin.database().ref('/sensors/' + sensorId).child('maxLife').set(maxLife);
+        }).then(function() {
+          admin.database().ref('/sensors/' + sensorId).child('currentTemperature').set(currentTemperature);
         });
       }
     });

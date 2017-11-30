@@ -61,7 +61,11 @@ function addOption(sensorId, sensor) {
   var a = document.createElement('a');
   a.href = '#';
   a.classList.add('pure-menu-link');
-  a.innerHTML = sensor.name;
+  var optionText = sensor.name;
+  if (sensor.currentTemperature) {
+    optionText += ', ' + sensor.currentTemperature + ' °C';
+  }
+  a.innerHTML = optionText;
   a.onclick = function() { changeSensor(sensorId); };
   li.appendChild(a);
   sensorMenu.appendChild(li);
@@ -270,11 +274,9 @@ function updateDom() {
   document.getElementById('temp').innerHTML = 'Temperatur';
   document.getElementById('volt').innerHTML = 'Spänning';
   document.getElementById('sig').innerHTML = 'Signalstyrka';
-  document.getElementById('exec').innerHTML = 'Exekveringstid';
   new Chartist.Line('#temperature', sensorList[currentSensorIndex].tempChartData, tempChartSettings);
   new Chartist.Line('#voltage', sensorList[currentSensorIndex].voltageChartData, voltageChartSettings);
   new Chartist.Line('#signal', sensorList[currentSensorIndex].signalChartData, signalChartSettings);
-  new Chartist.Line('#execTimeChart', sensorList[currentSensorIndex].execTimeChartData, execTimeChartSettings);
 }
 
 function getStringDate(m) {
@@ -302,6 +304,7 @@ function showExecTimeGraph() {
   if (element.classList.contains('hidden')) {
     element.classList.remove('hidden');
     element.classList.add('visible');
+    document.getElementById('exec').innerHTML = 'Exekveringstid';
     new Chartist.Line('#execTimeChart', sensorList[currentSensorIndex].execTimeChartData, execTimeChartSettings);
   } else {
     element.classList.remove('visible');
