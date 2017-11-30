@@ -54,26 +54,33 @@ var tempChartSettings = {
 var summarize = function(total, num) { return total + num; };
 
 function addOption(sensorId, sensor) {
-  var sensorSelectBox = document.getElementById('sensors');
-  var option = document.createElement('option');
-  option.text = sensor.name;
-  option.value = sensorId;
-  sensorSelectBox.add(option);
+  var sensorMenu = document.getElementById('sensors');
+  var li = document.createElement('li');
+  li.classList.add('pure-menu-item');
+  li.value = sensorId;
+  var a = document.createElement('a');
+  a.href = '#';
+  a.classList.add('pure-menu-link');
+  a.innerHTML = sensor.name;
+  a.onclick = function() { changeSensor(sensorId); };
+  li.appendChild(a);
+  sensorMenu.appendChild(li);
 }
 
 function clear() {
-  var sensorSelectBox = document.getElementById('sensors');
-  for(var i = sensorSelectBox.options.length - 1; i >= 0; i--) {
-    sensorSelectBox.remove(i);
+  var sensorMenu = document.getElementById('sensors');
+  while (sensorMenu.hasChildNodes()) {
+    sensorMenu.removeChild(sensorMenu.lastChild);
   }
   sensorList = [];
 }
 
 function removeOption(sensorId) {
-  var sensorSelectBox = document.getElementById('sensors');
-  for(var i = sensorSelectBox.options.length - 1; i >= 0; i--) {
-    if (sensorSelectBox.options[i].value === sensorId) {
-      sensorSelectBox.remove(i);
+  var sensorMenu = document.getElementById('sensors');
+  for(var nodeIndex in sensorMenu.childNodes) {
+    var node = sensorMenu.childNodes[nodeIndex];
+    if (node.value == sensorId) {
+      sensorMenu.removeChild(node);
       break;
     }
   }
@@ -113,10 +120,11 @@ document.addEventListener('DOMContentLoaded', function() {
               id: data.key,
               name: sensors[data.key].name,
               warnings: {},
-              medianExecutionTime: sensors[data.key].medianExecutionTime,
-              avgVoltageDrop: sensors[data.key].avgVoltageDrop,
-              avgBatteryLife: sensors[data.key].avgBatteryLife,
-              expectedLifeLeft: sensors[data.key].expectedLifeLeft
+              medianExecutionTime: sensors[data.key].medianExecutionTime ? sensors[data.key].medianExecutionTime : 0,
+              avgVoltageDrop: sensors[data.key].avgVoltageDrop ? sensors[data.key].avgVoltageDrop : 0,
+              expectedLifeLeft: sensors[data.key].expectedLifeLeft ? sensors[data.key].expectedLifeLeft : 0,
+              measurementsLeft: sensors[data.key].measurementsLeft ? sensors[data.key].measurementsLeft : 0,
+              hoursLeft: sensors[data.key].hoursLeft ? sensors[data.key].hoursLeft : 0
             };
 
             chartData = buildArrays(sensorData, data.key, sensor, (12*60*60*1000));
@@ -202,8 +210,6 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
       sensor.warnings = checkWarningSigns(i, sensorData, sensorId, diff);
     }
   }
-  sensor.approximateMeasurements = Math.round(((maxVoltage - 3) / sensor.avgVoltageDrop) * 10) / 10;
-  sensor.approximateDaysOfOperation = Math.round((sensor.approximateMeasurements / 48) * 10) / 10;
 
   tempChartSettings.low = minTemp - 4;
   tempChartSettings.high = maxTemp + 2;
@@ -236,13 +242,12 @@ function updateDom() {
   var currentDate = labels[labels.length - 1];
   var avgBatteryLife = Math.round((sensorList[currentSensorIndex].avgBatteryLife / 3600000) * 1000) / 1000;
   var expectedLifeLeft = Math.round((sensorList[currentSensorIndex].expectedLifeLeft / 3600000) * 1000) / 1000;
-  document.getElementById('latest').innerHTML = ' ' + current.value + ' °C, ' + currentDate;
+  document.getElementById('latest').innerHTML = current.value + ' °C, ' + currentDate;
+  document.getElementById('currentSensor').innerHTML = sensorList[currentSensorIndex].name;
   document.getElementById('execTime').innerHTML = sensorList[currentSensorIndex].medianExecutionTime + ' ms / exekvering';
-  document.getElementById('batteryLife').innerHTML = expectedLifeLeft + '/' + avgBatteryLife + ' h battertid';
-  document.getElementById('voltageChange').innerHTML = sensorList[currentSensorIndex].avgVoltageDrop + ' V/mätning > ' +
-                                                       sensorList[currentSensorIndex].approximateMeasurements +
-                                                       ' mätningar > ' + sensorList[currentSensorIndex].approximateDaysOfOperation +
-                                                       ' dagar';
+  document.getElementById('voltageChange').innerHTML = sensorList[currentSensorIndex].avgVoltageDrop + ' V/mätning | ' +
+                                                       sensorList[currentSensorIndex].measurementsLeft + ' mätningar kvar | ' +
+                                                       sensorList[currentSensorIndex].hoursLeft + ' h kvar';
   if (sensorList[currentSensorIndex].warnings.battery) {
     document.getElementById('batteryWarning').innerHTML = sensorList[currentSensorIndex].name + ' behöver laddas.';
   } else {
@@ -271,9 +276,8 @@ function getStringDate(m) {
   }
 }
 
-function changeSensor() {
+function changeSensor(selected) {
   for (var index in sensorList) {
-    var selected = document.getElementById('sensors').value;
     if (sensorList[index].id === selected) {
       currentSensorIndex = index;
       window.localStorage.setItem("currentSensorIndex", currentSensorIndex);

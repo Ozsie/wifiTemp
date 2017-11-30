@@ -1,0 +1,150 @@
+body {
+	background: #ECEFF1;
+	color: rgba(0,0,0,0.87);
+	font-family: Roboto, Helvetica, Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+}
+
+.text-prominent {
+	color: rgba(0,0,0,0.4);
+	text-align: center;
+}
+
+.text-weak {
+	color: rgba(0,0,0,0.2);
+	text-align: center;
+	font-size: 10px;
+}
+
+#load {
+	font-size: 13px;
+}
+
+#latest {
+	color: rgba(0,0,0,0.4);
+	text-align: center;
+	font-size: 64px;
+	margin-bottom: 10px;
+}
+
+.hidden {
+  visibility: hidden
+	height: 0px;
+	padding: 0px;
+	margin: 0px
+}
+.visible {
+  visibility: visible
+}
+
+.bonusData {
+	margin-left: 5%;
+}
+.warning {
+	background-color: red;
+	width: 100%;
+	text-align: center;
+	font-size: 28px;
+	margin-left: 20%;
+	width: 60%;
+	border-radius: 10px;
+}
+.chart {
+	width: 100%;
+}
+.wrapper {
+	display: grid;
+	grid-template-columns: 50% 50%;
+}
+.boxLeft {
+	border-radius: 5px;
+	padding: 5px 5px 5px 20px;
+}
+.boxRight {
+	border-radius: 5px;
+	padding: 5px 20px 5px 5px;
+}
+.a {
+	grid-column: 1;
+	grid-row: 1 / span 3;
+}
+.b {
+	grid-column: 2 / span 1;
+}
+.c {
+	grid-column: 2;
+	grid-row: 2;
+}
+.d {
+	grid-column: 2;
+	grid-row: 3;
+	visibility: hidden;
+}
+.select select {
+	margin-left: 5%;
+	font-size: 32px;
+	border-radius: 5px;
+	padding: 40px;
+	background-color: #3b8ec2;
+	color: #fff;
+}
+
+.currentWrapper {
+	display: grid;
+	grid-template-columns: 50% 50%;
+	border-width: 1px;
+	border-color: rgba(0,0,0,0.2);
+	border-style: hidden hidden solid hidden;
+	width: 90%;
+	margin-left: 5%;
+}
+.currentBox {
+	padding: 20px;
+}
+
+.menu {
+	border-width: 1px;
+	border-color: rgba(0,0,0,0.2);
+	border-style: solid hidden solid hidden;
+}
+
+@media (max-width: 750px) {
+	body {
+		margin-top: 0;
+	}
+	.wrapper {
+		display: grid;
+		grid-template-columns: 100%;
+	}
+	#latest {
+		color: rgba(0,0,0,0.4);
+		text-align: center;
+		font-size: 32px;
+		margin-bottom: 10px;
+	}
+	.a {
+		grid-column: 1;
+		grid-row: 1;
+	}
+	.b {
+		grid-column: 1 / span 1
+	}
+	.c {
+		grid-column: 1;
+		grid-row: 3;
+	}
+	.d {
+		grid-column: 1;
+		grid-row: 4;
+		visibility: hidden;
+	}
+.boxLeft {
+	border-radius: 5px;
+	padding: 5px 5px 5px 5px;
+}
+.boxRight {
+	border-radius: 5px;
+	padding: 5px 5px 5px 5px;
+}
+}
