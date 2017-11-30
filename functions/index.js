@@ -56,14 +56,20 @@ var calculateAverageVoltageDrop = function(sensorId) {
     var currentVoltage = 0;
     var maxVoltage = 0;
     var minVoltage = 5;
+    var chargeDate = 0;
     const sensorData = snapshot.val();
     for (id in sensorData) {
       currentVoltage = sensorData[id].voltage;
       if (currentVoltage > 5) {
         continue;
       }
-      if (previousVoltage > 0 && (previousVoltage - currentVoltage) > 0 && (previousVoltage - currentVoltage) < 1) {
-        voltageDrops.push(previousVoltage - currentVoltage);
+      var diff = previousVoltage - currentVoltage;
+      // After charge this should happen
+      if (diff < -0.5) {
+         chargeDate = sensorData[id].time;
+      }
+      if (previousVoltage > 0 && diff > 0 && diff < 1) {
+        voltageDrops.push(diff);
       }
       if (currentVoltage > maxVoltage) {
         maxVoltage = currentVoltage;
@@ -84,6 +90,7 @@ var calculateAverageVoltageDrop = function(sensorId) {
           measurementsLeft = Math.floor(voltsLeft / avgVoltageDrop);
           hoursLeft = Math.round((measurementsLeft / 2) * 10) / 10;
         }
+        var maxLife = Math.round((((Date.now() - chargeDate) / 3600000) + hoursLeft) * 10) / 10;
 
         return admin.database().ref('/sensors/' + sensorId).child('avgVoltageDrop').set(avgVoltageDrop).then(function() {
           admin.database().ref('/sensors/' + sensorId).child('currentVoltage').set(currentVoltage);
@@ -95,6 +102,10 @@ var calculateAverageVoltageDrop = function(sensorId) {
           admin.database().ref('/sensors/' + sensorId).child('hoursLeft').set(hoursLeft);
         }).then(function() {
           admin.database().ref('/sensors/' + sensorId).child('minVoltage').set(minVoltage);
+        }).then(function() {
+          admin.database().ref('/sensors/' + sensorId).child('chargeDate').set(chargeDate);
+        }).then(function() {
+          admin.database().ref('/sensors/' + sensorId).child('maxLife').set(maxLife);
         });
       }
     });

@@ -124,7 +124,8 @@ document.addEventListener('DOMContentLoaded', function() {
               avgVoltageDrop: sensors[data.key].avgVoltageDrop ? sensors[data.key].avgVoltageDrop : 0,
               expectedLifeLeft: sensors[data.key].expectedLifeLeft ? sensors[data.key].expectedLifeLeft : 0,
               measurementsLeft: sensors[data.key].measurementsLeft ? sensors[data.key].measurementsLeft : 0,
-              hoursLeft: sensors[data.key].hoursLeft ? sensors[data.key].hoursLeft : 0
+              hoursLeft: sensors[data.key].hoursLeft ? sensors[data.key].hoursLeft : 0,
+              maxLife: sensors[data.key].maxLife ? sensors[data.key].maxLife : 0
             };
 
             chartData = buildArrays(sensorData, data.key, sensor, (12*60*60*1000));
@@ -247,7 +248,8 @@ function updateDom() {
   document.getElementById('execTime').innerHTML = sensorList[currentSensorIndex].medianExecutionTime + ' ms / exekvering';
   document.getElementById('voltageChange').innerHTML = sensorList[currentSensorIndex].avgVoltageDrop + ' V/mätning | ' +
                                                        sensorList[currentSensorIndex].measurementsLeft + ' mätningar kvar | ' +
-                                                       sensorList[currentSensorIndex].hoursLeft + ' h kvar';
+                                                       sensorList[currentSensorIndex].hoursLeft + ' h kvar av ' +
+                                                       sensorList[currentSensorIndex].maxLife + ' h';
   if (sensorList[currentSensorIndex].warnings.battery) {
     document.getElementById('batteryWarning').innerHTML = sensorList[currentSensorIndex].name + ' behöver laddas.';
   } else {
