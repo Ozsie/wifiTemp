@@ -2,53 +2,35 @@ var currentSensorIndex = 0;
 
 var sensorList = [];
 
-var voltageChartSettings = {
+var settings = {
   axisX: {
     labelInterpolationFnc: function skipLabels(value, index) {
       return index % 3  === 0 ? value : null;
     }
   },
-  low: 2.5,
-  high: 4,
   plugins: [
     Chartist.plugins.tooltip({anchorToPoint: true})
   ]
+}
+
+var voltageChartSettings = {
+  axisX: settings.axisX,
+  low: 2.5,
+  high: 4,
+  plugins: settings.plugins
 };
 
 var signalChartSettings = {
-  axisX: {
-    labelInterpolationFnc: function skipLabels(value, index) {
-      return index % 3  === 0 ? value : null;
-    }
-  },
+  axisX: settings.axisX,
   low: -90,
   high: -40,
-  plugins: [
-    Chartist.plugins.tooltip({anchorToPoint: true})
-  ]
+  plugins: settings.plugins
 };
 
 var execTimeChartSettings = {
-  axisX: {
-    labelInterpolationFnc: function skipLabels(value, index) {
-      return index % 3  === 0 ? value : null;
-    }
-  },
+  axisX: settings.axisX,
   low: 3000,
-  plugins: [
-    Chartist.plugins.tooltip({anchorToPoint: true})
-  ]
-};
-
-var tempChartSettings = {
-  axisX: {
-    labelInterpolationFnc: function skipLabels(value, index) {
-      return index % 3  === 0 ? value : null;
-    }
-  },
-  plugins: [
-    Chartist.plugins.tooltip({anchorToPoint: true})
-  ]
+  plugins: settings.plugins
 };
 
 var summarize = function(total, num) { return total + num; };
@@ -103,6 +85,20 @@ function selectCorrectOption() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  var mc = new Hammer(document.getElementById('content'));
+
+  mc.on("swipeleft swiperight", function(ev) {
+    if (ev.type === 'swipeleft' && currentSensorIndex < sensorList.length - 1) {
+      currentSensorIndex++;
+      window.localStorage.setItem("currentSensorIndex", currentSensorIndex);
+      updateDom();
+    }
+    if (ev.type === 'swiperight' && currentSensorIndex > 0) {
+      currentSensorIndex--;
+      window.localStorage.setItem("currentSensorIndex", currentSensorIndex);
+      updateDom();
+    }
+  });
   try {
     let app = firebase.app();
     document.getElementById('load').innerHTML = '';
@@ -216,8 +212,8 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
     }
   }
 
-  tempChartSettings.low = minTemp - 4;
-  tempChartSettings.high = maxTemp + 2;
+  settings.low = minTemp - 4;
+  settings.high = maxTemp + 2;
   tempChartData.series.push(temperature);
   voltageChartData.series.push(voltage);
   signalChartData.series.push(signal);
@@ -271,7 +267,7 @@ function updateDom() {
     reportWarning.classList.add("hidden");
   }
   document.getElementById('temp').innerHTML = 'Temperatur';
-  new Chartist.Line('#temperature', sensorList[currentSensorIndex].tempChartData, tempChartSettings);
+  new Chartist.Line('#temperature', sensorList[currentSensorIndex].tempChartData, settings);
 
   var voltSeries = sensorList[currentSensorIndex].voltageChartData.series[0];
   var currentVoltage = voltSeries[series.length - 1].value;
