@@ -138,11 +138,6 @@ svg{
   bottom: 0;
   width: 100%;
   background: #ECEFF1;
-  height: 32px;
-}
-
-.menu ul {
-  margin-top: -10px;
 }
 
 @media (max-width: 720px) {
@@ -153,6 +148,18 @@ svg{
 		display: grid;
 		grid-template-columns: 100%;
 	}
+
+
+  .currentWrapper {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    border-width: 1px;
+    border-color: rgba(0,0,0,0.2);
+    border-style: hidden hidden solid hidden;
+    width: 90%;
+    margin-left: 5%;
+    padding-bottom: 10px;
+  }
 	#latest {
 		color: rgba(0,0,0,0.4);
 		text-align: center;
@@ -190,5 +197,9 @@ svg{
   }
   .warning-container {
     height: 20px;
+  }
+
+  .warning-icon {
+    width: 15%;
   }
 }
