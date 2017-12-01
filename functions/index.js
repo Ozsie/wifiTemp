@@ -24,7 +24,9 @@ var calculateAverageBatteryLife = function(batteryLife) {
 var convertVoltage = function(event) {
   return event.data.ref.child('voltage').once('value').then(function(snapshot) {
     var voltage = snapshot.val();
-    return event.data.ref.child('voltage').set(voltage / 1024);
+    return event.data.ref.child('voltage').set(voltage / 1024).then(function() {
+      admin.database().ref('/sensors/' + sensorId).child('currentTemperature').set(voltage / 1024);
+    });
   });
 };
 
@@ -108,8 +110,6 @@ var calculateAverageVoltageDrop = function(sensorId) {
           admin.database().ref('/sensors/' + sensorId).child('chargeDate').set(chargeDate);
         }).then(function() {
           admin.database().ref('/sensors/' + sensorId).child('maxLife').set(maxLife);
-        }).then(function() {
-          admin.database().ref('/sensors/' + sensorId).child('currentTemperature').set(currentTemperature);
         });
       }
     });
