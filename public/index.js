@@ -251,8 +251,7 @@ function updateDom() {
   document.getElementById('latest').innerHTML = current.value + ' °C, ' + currentDate;
   document.getElementById('currentSensor').innerHTML = sensorList[currentSensorIndex].name;
   document.getElementById('execTime').innerHTML = sensorList[currentSensorIndex].medianExecutionTime + ' ms / exekvering';
-  document.getElementById('voltageChange').innerHTML = sensorList[currentSensorIndex].avgVoltageDrop + ' V/mätning | ' +
-                                                       sensorList[currentSensorIndex].measurementsLeft + ' mätningar kvar | ' +
+  document.getElementById('voltageChange').innerHTML = sensorList[currentSensorIndex].measurementsLeft + ' mätningar kvar | ' +
                                                        sensorList[currentSensorIndex].hoursLeft + ' h kvar av ' +
                                                        sensorList[currentSensorIndex].maxLife + ' h';
   var batteryWarning = document.getElementById('batteryWarning');
@@ -272,10 +271,17 @@ function updateDom() {
     reportWarning.classList.add("hidden");
   }
   document.getElementById('temp').innerHTML = 'Temperatur';
-  document.getElementById('volt').innerHTML = 'Spänning';
-  document.getElementById('sig').innerHTML = 'Signalstyrka';
   new Chartist.Line('#temperature', sensorList[currentSensorIndex].tempChartData, tempChartSettings);
+
+  var voltSeries = sensorList[currentSensorIndex].voltageChartData.series[0];
+  var currentVoltage = voltSeries[series.length - 1].value;
+  var vPh = sensorList[currentSensorIndex].avgVoltageDrop * 2;
+  document.getElementById('volt').innerHTML = 'Spänning: ' + currentVoltage + ' V, ' + vPh + ' V/h';
   new Chartist.Line('#voltage', sensorList[currentSensorIndex].voltageChartData, voltageChartSettings);
+
+  var signalSeries = sensorList[currentSensorIndex].signalChartData.series[0];
+  var currentSignal = signalSeries[series.length - 1].value;
+  document.getElementById('sig').innerHTML = 'Signalstyrka: ' + currentSignal + ' dBm';
   new Chartist.Line('#signal', sensorList[currentSensorIndex].signalChartData, signalChartSettings);
 }
 

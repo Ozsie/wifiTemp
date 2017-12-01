@@ -6,6 +6,11 @@ body {
 	padding: 0;
 }
 
+.label {
+  font-size: 14px;
+  color: rgba(0,0,0,0.8);
+}
+
 .warning-icon {
   width: 5%;
 }
@@ -105,11 +110,11 @@ body {
 	margin-left: 5%;
 }
 .currentBox {
-	padding: 20px;
+	padding: 10px;
 }
 
 .content {
-  margin-top: 230px;
+  margin-top: 210px;
 }
 
 .header {
@@ -180,7 +185,7 @@ svg{
   }
 
   .content {
-    margin-top: 200px;
+    margin-top: 180px;
     margin-bottom: 30px;
   }
   .warning-container {
