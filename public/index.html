@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="sv">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#536878">
     <title>Temperaturen</title>
-    <link rel="manifest" href="manifest.js">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="resources/icon-180.png">
+    <link rel="shortcut icon" href="resources/icon-32.png" type="image/png">
 
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/4.6.2/firebase-app.js"></script>
@@ -55,13 +57,13 @@
         <div class="currentBox text-weak" id="voltageChange"></div>
         <div class="warning-container">
           <div id="reportWarning" class="warning hidden">
-            <img src="resources/warning.png" class="warning-icon">
+            <img src="resources/warning.png" class="warning-icon" alt="Varning">
             <span>Sensorn har inte rapporterat i tid.</span>
           </div>
         </div>
         <div class="warning-container">
           <div id="batteryWarning" class="warning hidden">
-            <img src="resources/battery.png" class="warning-icon">
+            <img src="resources/battery.png" class="warning-icon" alt="Batteri">
             <span>Batteriet behöver laddas.</span>
           </div>
         </div>

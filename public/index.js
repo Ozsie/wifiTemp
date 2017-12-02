@@ -45,7 +45,7 @@ function addOption(sensorId, sensor) {
   a.classList.add('pure-menu-link');
   var optionText = sensor.name;
   if (sensor.currentTemperature) {
-    optionText += ', ' + sensor.currentTemperature + ' °C';
+    optionText += ', ' + (Math.round(sensor.currentTemperature * 10) / 10) + ' °C';
   }
   a.innerHTML = optionText;
   a.onclick = function() { changeSensor(sensorId); };
@@ -166,10 +166,11 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
   var maxVoltage = 0;
   var minTemp = 100;
   var maxTemp = -100;
+  var diff = 0;
   for (id in sensorData) {
     i++;
     var date = sensorData[id].time;
-    var diff = now - date;
+    diff = now - date;
     var currentVoltage = sensorData[id].voltage;
     var currentSignal = sensorData[id].signal;
     var currentTemperature = sensorData[id].temperature;
@@ -207,11 +208,11 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
 
       execTimeChartData.labels.push(stringDate);
       exec.push({meta: m.format('lll'), value: currentExecTime });
-
-      sensor.warnings = checkWarningSigns(i, sensorData, sensorId, currentVoltage, diff);
     }
   }
 
+
+  sensor.warnings = checkWarningSigns(i, sensorData, sensorId, currentVoltage, diff);
   settings.low = minTemp - 4;
   settings.high = maxTemp + 2;
   tempChartData.series.push(temperature);
@@ -244,7 +245,11 @@ function updateDom() {
   var currentDate = labels[labels.length - 1];
   var avgBatteryLife = Math.round((sensorList[currentSensorIndex].avgBatteryLife / 3600000) * 1000) / 1000;
   var expectedLifeLeft = Math.round((sensorList[currentSensorIndex].expectedLifeLeft / 3600000) * 1000) / 1000;
-  document.getElementById('latest').innerHTML = current.value + ' °C, ' + currentDate;
+  if (current) {
+    document.getElementById('latest').innerHTML = current.value + ' °C, ' + currentDate;
+  } else {
+    document.getElementById('latest').innerHTML = ' n/a';
+  }
   document.getElementById('currentSensor').innerHTML = sensorList[currentSensorIndex].name;
   document.getElementById('execTime').innerHTML = sensorList[currentSensorIndex].medianExecutionTime + ' ms / exekvering';
   document.getElementById('voltageChange').innerHTML = sensorList[currentSensorIndex].measurementsLeft + ' mätningar kvar | ' +
@@ -270,14 +275,22 @@ function updateDom() {
   new Chartist.Line('#temperature', sensorList[currentSensorIndex].tempChartData, settings);
 
   var voltSeries = sensorList[currentSensorIndex].voltageChartData.series[0];
-  var currentVoltage = voltSeries[series.length - 1].value;
+  var currentVoltage = voltSeries[series.length - 1];
   var vPh = sensorList[currentSensorIndex].avgVoltageDrop * 2;
-  document.getElementById('volt').innerHTML = 'Spänning: ' + currentVoltage + ' V, ' + vPh + ' V/h';
+  if (currentVoltage) {
+    document.getElementById('volt').innerHTML = 'Spänning: ' + currentVoltage.value + ' V, ' + vPh + ' V/h';
+  } else {
+    document.getElementById('volt').innerHTML = 'Spänning: n/a, ' + vPh + ' V/h';
+  }
   new Chartist.Line('#voltage', sensorList[currentSensorIndex].voltageChartData, voltageChartSettings);
 
   var signalSeries = sensorList[currentSensorIndex].signalChartData.series[0];
-  var currentSignal = signalSeries[series.length - 1].value;
-  document.getElementById('sig').innerHTML = 'Signalstyrka: ' + currentSignal + ' dBm';
+  var currentSignal = signalSeries[series.length - 1];
+  if (currentSignal) {
+    document.getElementById('sig').innerHTML = 'Signalstyrka: ' + currentSignal.value + ' dBm';
+  } else {
+    document.getElementById('sig').innerHTML = 'Signalstyrka: n/a';
+  }
   new Chartist.Line('#signal', sensorList[currentSensorIndex].signalChartData, signalChartSettings);
 }
 

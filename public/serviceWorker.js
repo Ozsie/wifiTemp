@@ -12,9 +12,7 @@ self.addEventListener('install', function(e) {
 const OFFLINE_URL = 'offline.html';
 
 self.addEventListener('fetch', event => {
-  console.log('fetch: ' + event);
-  if (event.request.mode === 'navigate' ||
-      (event.request.method === 'GET' &&
+  if ((event.request.method === 'GET' &&
        event.request.headers.get('accept').includes('text/html'))) {
     console.log('Handling fetch event for', event.request.url);
     event.respondWith(
