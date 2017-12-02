@@ -3,16 +3,16 @@
     "rules": "database.rules.json"
   },
   "hosting": {
-    "headers": [ {
-      "source": "**/*.js)",
+    "headers": [{
+      "source": "index.js",
       "headers": [
         {
           "key": "Content-Type",
-          "value": "text/javascript"
+          "value": "text/javascript;charset=utf-8"
         }
       ]
     }, {
-      "source": "**/*.ico)",
+      "source": "**/resources/*.png",
       "headers": [
         {
           "key": "Content-Type",
@@ -20,7 +20,15 @@
         }
       ]
     }, {
-      "source": "**/*.*)",
+      "source": "**/*.png",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "image/png"
+        }
+      ]
+    }, {
+      "source": "**",
       "headers": [
         {
           "key": "X-Content-Type-Options",

@@ -9,15 +9,27 @@
     "formatters": [
         "stylish"
     ],
-    "ignoredUrls": [],
+    "ignoredUrls": [{
+        "domain": ".*\\.jsdelivr\\.net/.*",
+        "rules": ["*"]
+    }, {
+        "domain": ".*\\.unpkg\\.com/.*",
+        "rules": ["*"]
+    }, {
+        "domain": ".*\\.cloudflare\\.com/.*",
+        "rules": ["*"]
+    }, {
+        "domain": "wifi-thermometer.firebaseapp.com/__/firebase/.*",
+        "rules": ["*"]
+    }],
     "rules": {
         "amp-validator": "off",
         "apple-touch-icons": "error",
-        "axe": "error",
+        "axe": "off",
         "content-type": "error",
         "disown-opener": "error",
-        "highest-available-document-mode": "error",
-        "html-checker": "error",
+        "highest-available-document-mode": "off",
+        "html-checker": "off",
         "image-optimization-cloudinary": "off",
         "manifest-app-name": "error",
         "manifest-exists": "error",
@@ -25,7 +37,9 @@
         "manifest-is-valid": "error",
         "meta-charset-utf-8": "error",
         "meta-viewport": "error",
-        "no-disallowed-headers": "error",
+        "no-disallowed-headers":[ "error", {
+            "ignore": ["Server"]
+        }],
         "no-friendly-error-pages": "error",
         "no-html-only-headers": "error",
         "no-http-redirects": "error",

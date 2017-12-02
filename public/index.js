@@ -10,9 +10,10 @@ var sensorList = [];
 var settings = {
   axisX: {
     labelInterpolationFnc: function skipLabels(value, index) {
-      return index % 3  === 0 ? value : null;
+      return index % 9  === 0 ? value : null;
     }
   },
+  showPoint: false,
   plugins: [
     Chartist.plugins.tooltip({anchorToPoint: true})
   ]
@@ -20,13 +21,15 @@ var settings = {
 
 var voltageChartSettings = {
   axisX: settings.axisX,
-  low: 2.5,
+  showPoint: settings.showPoint,
+  low: 2.8,
   high: 4,
   plugins: settings.plugins
 };
 
 var signalChartSettings = {
   axisX: settings.axisX,
+  showPoint: settings.showPoint,
   low: -90,
   high: -40,
   plugins: settings.plugins
@@ -34,6 +37,7 @@ var signalChartSettings = {
 
 var execTimeChartSettings = {
   axisX: settings.axisX,
+  showPoint: settings.showPoint,
   low: 3000,
   plugins: settings.plugins
 };
@@ -129,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
               maxLife: sensors[data.key].maxLife ? sensors[data.key].maxLife : 0
             };
 
-            var chartData = buildArrays(sensorData, data.key, sensor, (12*60*60*1000));
+            var chartData = buildArrays(sensorData, data.key, sensor, (24*60*60*1000));
             var attempts = 1;
             while (chartData.t.series[0].length === 0 && attempts <= 5) {
               chartData = buildArrays(sensorData, data.key, sensor, ((12 + (attempts * 2))*60*60*1000))
@@ -213,7 +217,7 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
 
 
   sensor.warnings = checkWarningSigns(i, sensorData, sensorId, currentVoltage, diff);
-  settings.low = minTemp - 4;
+  settings.low = minTemp - 2;
   settings.high = maxTemp + 2;
   tempChartData.series.push(temperature);
   voltageChartData.series.push(voltage);
