@@ -1,3 +1,5 @@
+/* global require */
+/* global exports */
 const functions = require('firebase-functions');
 
 const admin = require('firebase-admin');
@@ -8,17 +10,6 @@ var summarize = function(total, num) {
     return total;
   }
   return total + num;
-};
-
-var calculateLifeLeft = function(batteryLife, maxDate) {
-  var sum = batteryLife.reduce(summarize);
-  var lifeMillis = sum / batteryLife.length;
-  return lifeMillis - Math.round((Date.now() - maxDate) * 10) / 10;
-};
-
-var calculateAverageBatteryLife = function(batteryLife) {
-  var sum = batteryLife.reduce(summarize);
-  return Math.round((sum / batteryLife.length) * 10) / 10;
 };
 
 var convertVoltage = function(event) {
@@ -64,11 +55,9 @@ var calculateAverageVoltageDrop = function(sensorId) {
     var maxVoltage = 0;
     var minVoltage = 5;
     var chargeDate = 0;
-    var currentTemperature = 0;
     const sensorData = snapshot.val();
-    for (id in sensorData) {
+    for (var id in sensorData) {
       currentVoltage = sensorData[id].voltage;
-      currentTemperature = sensorData[id].temperature;
       if (currentVoltage > 5) {
         continue;
       }
@@ -116,6 +105,8 @@ var calculateAverageVoltageDrop = function(sensorId) {
         }).then(function() {
           admin.database().ref('/sensors/' + sensorId).child('maxLife').set(maxLife);
         });
+      } else {
+        return null;
       }
     });
   });

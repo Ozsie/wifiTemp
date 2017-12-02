@@ -5,11 +5,15 @@
   "author": "Oscar Djupfeldt",
   "license": "MIT",
   "scripts": {
+    "lint": "eslint ./public/*.js ./functions/index.js --ignore-path .eslintignore",
     "serve": "firebase serve",
     "deploy": "firebase deploy",
     "deploy-f": "firebase deploy --only functions",
     "deploy-h": "firebase deploy --only hosting",
     "deploy-d": "firebase deploy --only database",
     "logs": "firebase functions:log"
+  },
+  "devDependencies": {
+    "eslint": "^4.9.0"
   }
 }

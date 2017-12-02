@@ -1,3 +1,8 @@
+/* global firebase */
+/* global Chartist */
+/* global moment */
+/* global Hammer */
+
 var currentSensorIndex = 0;
 
 var sensorList = [];
@@ -32,8 +37,6 @@ var execTimeChartSettings = {
   low: 3000,
   plugins: settings.plugins
 };
-
-var summarize = function(total, num) { return total + num; };
 
 function addOption(sensorId, sensor) {
   var sensorMenu = document.getElementById('sensors');
@@ -100,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   try {
-    let app = firebase.app();
     document.getElementById('load').innerHTML = '';
 
     firebase.database().ref('/sensors').on('value', snapshot => {
@@ -115,7 +117,6 @@ document.addEventListener('DOMContentLoaded', function() {
           if (!sensorData) {
             removeOption(data.key);
           } else {
-            var name = sensors[data.key].name;
             var sensor = {
               id: data.key,
               name: sensors[data.key].name,
@@ -128,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
               maxLife: sensors[data.key].maxLife ? sensors[data.key].maxLife : 0
             };
 
-            chartData = buildArrays(sensorData, data.key, sensor, (12*60*60*1000));
+            var chartData = buildArrays(sensorData, data.key, sensor, (12*60*60*1000));
             var attempts = 1;
             while (chartData.t.series[0].length === 0 && attempts <= 5) {
               chartData = buildArrays(sensorData, data.key, sensor, ((12 + (attempts * 2))*60*60*1000))
@@ -147,17 +148,16 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   } catch (e) {
-    console.error(e);
     document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
   }
 });
 
 function buildArrays(sensorData, sensorId, sensor, timeLimit) {
   var now = Date.now();
-  tempChartData = { labels: [], series: [] };
-  voltageChartData = { labels: [], series: [] };
-  signalChartData = { labels: [], series: [] };
-  execTimeChartData = { labels: [], series: [] };
+  var tempChartData = { labels: [], series: [] };
+  var voltageChartData = { labels: [], series: [] };
+  var signalChartData = { labels: [], series: [] };
+  var execTimeChartData = { labels: [], series: [] };
   var temperature = [];
   var voltage = [];
   var signal = [];
@@ -167,7 +167,7 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
   var minTemp = 100;
   var maxTemp = -100;
   var diff = 0;
-  for (id in sensorData) {
+  for (var id in sensorData) {
     i++;
     var date = sensorData[id].time;
     diff = now - date;
@@ -243,8 +243,6 @@ function updateDom() {
   var current = series[series.length - 1];
   var labels = sensorList[currentSensorIndex].tempChartData.labels;
   var currentDate = labels[labels.length - 1];
-  var avgBatteryLife = Math.round((sensorList[currentSensorIndex].avgBatteryLife / 3600000) * 1000) / 1000;
-  var expectedLifeLeft = Math.round((sensorList[currentSensorIndex].expectedLifeLeft / 3600000) * 1000) / 1000;
   if (current) {
     document.getElementById('latest').innerHTML = current.value + ' °C, ' + currentDate;
   } else {
@@ -311,10 +309,10 @@ function changeSensor(selected) {
       break;
     }
   }
-};
+}
 
+/* exported showExecTimeGraph */
 function showExecTimeGraph() {
-  var newStyle;
   var element = document.getElementById('execBox');
   if (element.classList.contains('hidden')) {
     element.classList.remove('hidden');
