@@ -24,9 +24,14 @@ var calculateAverageBatteryLife = function(batteryLife) {
 var convertVoltage = function(event) {
   return event.data.ref.child('voltage').once('value').then(function(snapshot) {
     var voltage = snapshot.val();
-    return event.data.ref.child('voltage').set(voltage / 1024).then(function() {
-      admin.database().ref('/sensors/' + sensorId).child('currentTemperature').set(voltage / 1024);
-    });
+    return event.data.ref.child('voltage').set(voltage / 1024);
+  });
+};
+
+var setCurrentTemperature = function(event) {
+  return event.data.ref.child('temperature').once('value').then(function(snapshot) {
+    var temperature = snapshot.val();
+    return admin.database().ref('/sensors/' + event.params.sensorId).child('currentTemperature').set(temperature);
   });
 };
 
@@ -121,9 +126,11 @@ exports.addMoreData = functions.database.ref('/{sensorId}/{pushId}').onWrite(eve
     return null;
   }
   return addTimeStamp(event).then(function() {
-    return convertVoltage(event).then(function() {
-      calculateMedianExecutionTime(event.params.sensorId);
-      calculateAverageVoltageDrop(event.params.sensorId);
+    return setCurrentTemperature(event).then(function() {
+      return convertVoltage(event).then(function() {
+        calculateMedianExecutionTime(event.params.sensorId);
+        calculateAverageVoltageDrop(event.params.sensorId);
+      });
     });
   });
 });
