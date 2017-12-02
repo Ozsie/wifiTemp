@@ -5,10 +5,8 @@ node_js:
   - "7"
 install:
   - "yarn install"
-before_test:
-  - "yarn lint"
 test:
-  - "yarn lint"
+  - "yarn run test"
 branches:
   only:
     - "master"
