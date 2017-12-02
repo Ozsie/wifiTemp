@@ -3,6 +3,31 @@
     "rules": "database.rules.json"
   },
   "hosting": {
+    "headers": [ {
+      "source": "**/*.js)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/javascript"
+        }
+      ]
+    }, {
+      "source": "**/*.ico)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "image/png"
+        }
+      ]
+    }, {
+      "source": "**/*.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }],
     "public": "public",
     "ignore": [
       "firebase.json",
