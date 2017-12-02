@@ -3,5 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "author": "Oscar Djupfeldt",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "serve": "firebase serve",
+    "deploy": "firebase deploy",
+    "deploy-f": "firebase deploy --only functions",
+    "deploy-h": "firebase deploy --only hosting",
+    "deploy-d": "firebase deploy --only database",
+    "logs": "firebase functions:log"
+  }
 }
