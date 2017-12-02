@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "pretest": "yarn run lint",
-    "test": "echo 'n/a",
+    "test": "echo 'n/a'",
     "lint": "eslint ./public/*.js ./functions/index.js --ignore-path .eslintignore",
     "serve": "firebase serve",
     "deploy": "firebase deploy",
