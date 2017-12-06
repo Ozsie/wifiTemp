@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#536878">
+    <title>Temperaturen - Admin</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="resources/icon-180.png">
+    <link rel="shortcut icon" href="resources/icon-32.png" type="image/png">
+
+    <script defer src="/__/firebase/4.6.2/firebase-app.js"></script>
+    <script defer src="/__/firebase/4.6.2/firebase-database.js"></script>
+    <script defer src="/__/firebase/4.6.2/firebase-auth.js"></script>
+    <script defer src="/__/firebase/init.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.3/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.3/locale/sv.js"></script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <script src="admin.js"></script>
+    <form>
+      <input type="email" id="email">
+      <input type="password" id="password">
+      <input type="button" onclick="login()" value="Logga in">
+    </form>
+    <table id="sensorList">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Sleep time</th>
+          <th>Command</th>
+        </tr>
+      </thead>
+      <tbody id="sensors">
+      </tbody>
+    </table>
+  </body>
+</html>
