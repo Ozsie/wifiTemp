@@ -1,8 +1,8 @@
 {
   "rules": {
-    "names": {
+    "sensors": {
       ".read": "true",
-      ".write": "false"
+      ".write": "auth != null"
     },
     "1234": {
       ".read": "true",
@@ -23,6 +23,6 @@
       ".indexOn": ["time", "runtime"]
     },
     ".read": "true",
-    ".write": "false"
+    ".write": "auth != null"
   }
 }
