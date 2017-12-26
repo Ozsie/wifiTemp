@@ -80,8 +80,8 @@ function removeOption(sensorId) {
 }
 
 function selectCorrectOption() {
-  if (window.localStorage.getItem("currentSensorIndex")) {
-    currentSensorIndex = window.localStorage.getItem("currentSensorIndex");
+  if (window.localStorage.getItem('currentSensorIndex')) {
+    currentSensorIndex = window.localStorage.getItem('currentSensorIndex');
 
     if (currentSensorIndex > sensorList.length - 1) {
       currentSensorIndex = sensorList.length - 1;
@@ -94,15 +94,15 @@ function selectCorrectOption() {
 document.addEventListener('DOMContentLoaded', function() {
   var mc = new Hammer(document.getElementById('content'));
 
-  mc.on("swipeleft swiperight", function(ev) {
+  mc.on('swipeleft swiperight', function(ev) {
     if (ev.type === 'swipeleft' && currentSensorIndex < sensorList.length - 1) {
       currentSensorIndex++;
-      window.localStorage.setItem("currentSensorIndex", currentSensorIndex);
+      window.localStorage.setItem('currentSensorIndex', currentSensorIndex);
       updateDom();
     }
     if (ev.type === 'swiperight' && currentSensorIndex > 0) {
       currentSensorIndex--;
-      window.localStorage.setItem("currentSensorIndex", currentSensorIndex);
+      window.localStorage.setItem('currentSensorIndex', currentSensorIndex);
       updateDom();
     }
   });
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
       for (var sensorId in sensors) {
         addOption(sensorId, sensors[sensorId]);
 
-        firebase.database().ref('/' + sensorId).orderByChild('time').startAt(Date.now() - 4*7*24*60*60*1000).once('value', data => {
+        firebase.database().ref('/' + sensorId).orderByChild('time').startAt(Date.now() - 1*7*24*60*60*1000).once('value', data => {
           const sensorData = data.val()
           if (!sensorData) {
             removeOption(data.key);
@@ -187,7 +187,7 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
     if (diff > timeLimit && Object.keys(sensorData).length > 10) {
       continue;
     } else {
-      var m = moment(date, "x");
+      var m = moment(date, 'x');
       moment.locale();
       if (!m.isValid()) {
         continue;
@@ -260,18 +260,18 @@ function updateDom() {
   var batteryWarning = document.getElementById('batteryWarning');
   var reportWarning = document.getElementById('reportWarning');
   if (sensorList[currentSensorIndex].warnings.battery) {
-    batteryWarning.classList.remove("hidden");
-    batteryWarning.classList.add("visible");
+    batteryWarning.classList.remove('hidden');
+    batteryWarning.classList.add('visible');
   } else {
-    batteryWarning.classList.remove("visible");
-    batteryWarning.classList.add("hidden");
+    batteryWarning.classList.remove('visible');
+    batteryWarning.classList.add('hidden');
   }
   if (sensorList[currentSensorIndex].warnings.noReport) {
-    reportWarning.classList.remove("hidden");
-    reportWarning.classList.add("visible");
+    reportWarning.classList.remove('hidden');
+    reportWarning.classList.add('visible');
   } else {
-    reportWarning.classList.remove("visible");
-    reportWarning.classList.add("hidden");
+    reportWarning.classList.remove('visible');
+    reportWarning.classList.add('hidden');
   }
   document.getElementById('temp').innerHTML = 'Temperatur';
   new Chartist.Line('#temperature', sensorList[currentSensorIndex].tempChartData, settings);
@@ -308,7 +308,7 @@ function changeSensor(selected) {
   for (var index in sensorList) {
     if (sensorList[index].id === selected) {
       currentSensorIndex = index;
-      window.localStorage.setItem("currentSensorIndex", currentSensorIndex);
+      window.localStorage.setItem('currentSensorIndex', currentSensorIndex);
       updateDom();
       break;
     }
