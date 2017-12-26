@@ -146,9 +146,7 @@ svg{
   background: #ECEFF1;
 }
 
-
 @media (max-width: 1350px) {
-
   .warning-icon {
     width: 5%;
   }
