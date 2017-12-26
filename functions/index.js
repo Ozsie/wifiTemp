@@ -112,8 +112,20 @@ var calculateAverageVoltageDrop = function(sensorId) {
   });
 };
 
+var clearOldValues = function(sensorId) {
+  return admin.database().ref('/' + sensorId).orderByChild('time').endAt(Date.now() - 3*7*24*60*60*1000).once('value').then(function(snapshot) {
+    snapshot.forEach(function(child) {
+      child.ref.remove(function(error) {
+        if (error) {
+          console.error(error);
+        }
+      });
+    });
+  });
+};
+
 exports.addMoreData = functions.database.ref('/{sensorId}/{pushId}').onWrite(event => {
-  if (event.data.previous.exists()) {
+  if (event.data.previous.exists() || event.params.sensorId === 'sensors') {
     return null;
   }
   return addTimeStamp(event).then(function() {
@@ -121,6 +133,7 @@ exports.addMoreData = functions.database.ref('/{sensorId}/{pushId}').onWrite(eve
       return convertVoltage(event).then(function() {
         calculateMedianExecutionTime(event.params.sensorId);
         calculateAverageVoltageDrop(event.params.sensorId);
+        clearOldValues(event.params.sensorId);
       });
     });
   });
