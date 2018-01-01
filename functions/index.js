@@ -31,7 +31,7 @@ var addTimeStamp = function(event) {
 };
 
 var calculateMedianExecutionTime = function(sensorId) {
-  return admin.database().ref('/' + sensorId).orderByChild('time').startAt(Date.now() - 1*7*24*60*60*1000).once('value').then(function(snapshot) {
+  return admin.database().ref('/sensors/' + sensorId + '/data').orderByChild('time').startAt(Date.now() - 1*7*24*60*60*1000).once('value').then(function(snapshot) {
     var execTimes = [];
     const sensorData = snapshot.val();
     for (var id in sensorData) {
@@ -48,7 +48,7 @@ var calculateMedianExecutionTime = function(sensorId) {
 };
 
 var calculateAverageVoltageDrop = function(sensorId) {
-  return admin.database().ref('/' + sensorId).orderByChild('time').once('value').then(function(snapshot) {
+  return admin.database().ref('/sensors/' + sensorId + '/data').orderByChild('time').once('value').then(function(snapshot) {
     var previousVoltage = 0;
     var voltageDrops = [];
     var currentVoltage = 0;
@@ -58,6 +58,7 @@ var calculateAverageVoltageDrop = function(sensorId) {
     const sensorData = snapshot.val();
     for (var id in sensorData) {
       currentVoltage = sensorData[id].voltage;
+      console.log(sensorId, currentVoltage)
       if (currentVoltage > 5) {
         continue;
       }
@@ -113,7 +114,7 @@ var calculateAverageVoltageDrop = function(sensorId) {
 };
 
 var clearOldValues = function(sensorId) {
-  return admin.database().ref('/' + sensorId).orderByChild('time').endAt(Date.now() - 3*7*24*60*60*1000).once('value').then(function(snapshot) {
+  return admin.database().ref('/sensors/' + sensorId + '/data').orderByChild('time').endAt(Date.now() - 3*7*24*60*60*1000).once('value').then(function(snapshot) {
     snapshot.forEach(function(child) {
       child.ref.remove(function(error) {
         if (error) {
@@ -124,7 +125,16 @@ var clearOldValues = function(sensorId) {
   });
 };
 
-exports.addMoreData = functions.database.ref('/{sensorId}/{pushId}').onWrite(event => {
+exports.addMoreDataOld = functions.database.ref('/{sensorId}/{pushId}').onWrite(event => {
+  if (event.data.previous.exists() || event.params.sensorId === 'sensors') {
+    return null;
+  }
+  return admin.database().ref('/sensors/' + event.params.sensorId + '/data').push(event.data.val()).then(snapshot => {
+    return admin.database().ref('/' + event.params.sensorId + '/' + event.params.pushId).remove();
+  });
+});
+
+exports.addMoreData = functions.database.ref('/sensors/{sensorId}/data/{pushId}').onWrite(event => {
   if (event.data.previous.exists() || event.params.sensorId === 'sensors') {
     return null;
   }
