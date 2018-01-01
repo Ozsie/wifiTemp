@@ -110,45 +110,40 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('load').innerHTML = '';
 
     firebase.database().ref('/sensors').on('value', snapshot => {
-      var sensors = snapshot.val();
+      const sensors = snapshot.val();
       clear();
 
       for (var sensorId in sensors) {
-        addOption(sensorId, sensors[sensorId]);
+        const sensorData = sensors[sensorId].data;
+        if (sensorData) {
+          addOption(sensorId, sensors[sensorId]);
+          var sensor = {
+            id: sensorId,
+            name: sensors[sensorId].name,
+            warnings: {},
+            medianExecutionTime: sensors[sensorId].medianExecutionTime ? sensors[sensorId].medianExecutionTime : 0,
+            avgVoltageDrop: sensors[sensorId].avgVoltageDrop ? sensors[sensorId].avgVoltageDrop : 0,
+            expectedLifeLeft: sensors[sensorId].expectedLifeLeft ? sensors[sensorId].expectedLifeLeft : 0,
+            measurementsLeft: sensors[sensorId].measurementsLeft ? sensors[sensorId].measurementsLeft : 0,
+            hoursLeft: sensors[sensorId].hoursLeft ? sensors[sensorId].hoursLeft : 0,
+            maxLife: sensors[sensorId].maxLife ? sensors[sensorId].maxLife : 0
+          };
 
-        firebase.database().ref('/' + sensorId).orderByChild('time').startAt(Date.now() - 1*7*24*60*60*1000).once('value', data => {
-          const sensorData = data.val()
-          if (!sensorData) {
-            removeOption(data.key);
-          } else {
-            var sensor = {
-              id: data.key,
-              name: sensors[data.key].name,
-              warnings: {},
-              medianExecutionTime: sensors[data.key].medianExecutionTime ? sensors[data.key].medianExecutionTime : 0,
-              avgVoltageDrop: sensors[data.key].avgVoltageDrop ? sensors[data.key].avgVoltageDrop : 0,
-              expectedLifeLeft: sensors[data.key].expectedLifeLeft ? sensors[data.key].expectedLifeLeft : 0,
-              measurementsLeft: sensors[data.key].measurementsLeft ? sensors[data.key].measurementsLeft : 0,
-              hoursLeft: sensors[data.key].hoursLeft ? sensors[data.key].hoursLeft : 0,
-              maxLife: sensors[data.key].maxLife ? sensors[data.key].maxLife : 0
-            };
-
-            var chartData = buildArrays(sensorData, data.key, sensor, (24*60*60*1000));
-            var attempts = 1;
-            while (chartData.t.series[0].length === 0 && attempts <= 5) {
-              chartData = buildArrays(sensorData, data.key, sensor, ((12 + (attempts * 2))*60*60*1000))
-              attempts++;
-            }
-            sensor.tempChartData = chartData.t;
-            sensor.voltageChartData = chartData.v;
-            sensor.signalChartData = chartData.s;
-            sensor.execTimeChartData = chartData.e;
-            sensorList.push(sensor);
-
-            selectCorrectOption();
-            updateDom();
+          var chartData = buildArrays(sensorData, sensorId, sensor, (24*60*60*1000));
+          var attempts = 1;
+          while (chartData.t.series[0].length === 0 && attempts <= 5) {
+            chartData = buildArrays(sensorData, sensorId, sensor, ((12 + (attempts * 2))*60*60*1000))
+            attempts++;
           }
-        });
+          sensor.tempChartData = chartData.t;
+          sensor.voltageChartData = chartData.v;
+          sensor.signalChartData = chartData.s;
+          sensor.execTimeChartData = chartData.e;
+          sensorList.push(sensor);
+
+          selectCorrectOption();
+          updateDom();
+        }
       }
     });
   } catch (e) {
