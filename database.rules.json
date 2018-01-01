@@ -2,16 +2,16 @@
   "rules": {
     "sensors": {
       ".read": "true",
-      ".write": "auth != null"
-    },
-    "1234": {
-      ".read": "true",
-      ".write": "true",
-      "$post": {
-        ".validate": "newData.hasChildren(['voltage', 'temperature', 'signal', 'runtime']) && newData.child('signal').isNumber() && newData.child('voltage').isNumber() && newData.child('temperature').isNumber() && newData.child('runtime').isNumber()",
-        ".read": "true"
-      },
-      ".indexOn": ["time", "runtime"]
+      ".write": "auth != null",
+      "data": {
+        ".read": "true",
+        ".write": "auth != null",
+        "$post": {
+          ".validate": "newData.hasChildren(['voltage', 'temperature', 'signal', 'runtime']) && newData.child('signal').isNumber() && newData.child('voltage').isNumber() && newData.child('temperature').isNumber() && newData.child('runtime').isNumber()",
+          ".read": "true"
+        },
+        ".indexOn": ["time", "runtime"]
+      }
     },
     "2854273": {
       ".read": "true",
@@ -22,7 +22,7 @@
       },
       ".indexOn": ["time", "runtime"]
     },
-    ".read": "true",
+    ".read": "auth != null",
     ".write": "auth != null"
   }
 }
