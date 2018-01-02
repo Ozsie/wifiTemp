@@ -28,6 +28,27 @@ void handleRoot() {
   } else {
     hubPort = server.arg("port").toInt();
   }
+
+  if (server.arg("hubUser") == "") {
+    server.send(200, "text/html", "<h1>Hub user missing</h1>");
+    return;
+  } else {
+    server.arg("hubUser").toCharArray(hubUser, sizeof(hubUser) - 1);
+  }
+
+  if (server.arg("hubPassword") == "") {
+    server.send(200, "text/html", "<h1>Hub password missing</h1>");
+    return;
+  } else {
+    server.arg("hubPassword").toCharArray(hubPassword, sizeof(hubPassword) - 1);
+  }
+
+  if (server.arg("hubSecret") == "") {
+    server.send(200, "text/html", "<h1>Hub secret missing</h1>");
+    return;
+  } else {
+    server.arg("hubSecret").toCharArray(hubSecret, sizeof(hubSecret) - 1);
+  }
   server.send(200, "text/html", "<h1>OK!</h1>");
   saveCredentials();
 }
@@ -45,7 +66,13 @@ void setupServer() {
   IPAddress myIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(myIP);
+  Serial.print("Sensor ID: ");
+  Serial.println(ESP.getChipId());
+  Serial.println("HTTP server started. Configure with below HTTP request.");
+  Serial.print("GET ");
+  Serial.print(myIP);
+  Serial.println("/?ssid=<SSID>&password=<PASSWORD>&ip=<IP>&port=<PORT>&hubUser=<HUB_USER>&hubPassword=<HUB_PASSWORD>&hubSecret=<HUB_SECRET>");
   server.on("/", handleRoot);
   server.begin();
-  Serial.println("HTTP server started");
 }
+

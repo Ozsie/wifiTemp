@@ -1,4 +1,4 @@
-#include <WiFiClient.h><
+#include <WiFiClient.h>
 #ifndef WIFI_TEMP
 #define WIFI_TEMP
 
@@ -8,6 +8,7 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <EEPROM.h>
+#include <ArduinoOTA.h>
 
 ESP8266WebServer server(80);
 
@@ -22,6 +23,10 @@ unsigned long start;
 
 char wifiSsid[32] = "";
 char wifiPassword[32] = "";
-char hubIp[32] = "";
+char hubIp[64] = "";
+char hubUser[32] = "";
+char hubPassword[32] = "";
+char hubSecret[128] = "";
 uint16_t hubPort;
 #endif
+

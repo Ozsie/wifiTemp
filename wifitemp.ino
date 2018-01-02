@@ -6,8 +6,9 @@ void setup() {
   start = millis();
   Serial.begin(115200);
 
+  Serial.println("");
   Serial.print("EEPROM size required: ");
-  Serial.println(0+sizeof(wifiSsid)+sizeof(wifiPassword)+sizeof(hubIp)+sizeof(hubPort)+sizeof("OK"));
+  Serial.println(0+sizeof(wifiSsid)+sizeof(wifiPassword)+sizeof(hubIp)+sizeof(hubPort)+sizeof(hubUser)+sizeof(hubPassword)+sizeof(hubSecret)+sizeof("OK"));
 
   //saveCredentials();
   loadCredentials();
@@ -21,7 +22,7 @@ void loop() {
   if (strlen(wifiPassword) == 0 || strlen(wifiSsid) == 0 ||
       strlen(hubIp) == 0 || hubPort == NULL) {
     server.handleClient();
-  } else if (WiFi.status() != WL_CONNECTED){
+  } else if (WiFi.status() != WL_CONNECTED) {
     wifiConnect();
   } else {
     uint16_t attempts = 0;
@@ -74,48 +75,3 @@ void reset() {
   ESP.restart();
 }
 
-void sendTemperature(float temp) {  
-  WiFiClientSecure client;
-
-  uint16_t attempts = 0;
-   
-  while(!client.connect(hubIp, hubPort) && attempts < 4) {
-    Serial.println("connection failed");
-    wifiConnect(); 
-    attempts++;
-  }
-
-  if (attempts == 4) {
-    Serial.println("Failed to send temperature");
-  } else {
-    String url = "/" + String(ESP.getChipId()) + ".json";
-
-    String payload = "{\"voltage\":" + String(ESP.getVcc()) +
-                     ",\"temperature\":" + String(temp) +
-                     ",\"signal\":" + String(WiFi.RSSI()) +
-                     ",\"runtime\":" + String(start - millis() + 800) + "}";
-  
-    Serial.print("POST data to URL: ");
-    Serial.print(hubIp);
-    Serial.println(url);
-    Serial.print("Payload: ");
-    Serial.println(payload);
-    Serial.print("Content length :");
-    Serial.println(payload.length());
-    
-    client.println(String("POST ") + url + " HTTP/1.1");
-    client.println("Content-Type: application/json");
-    client.println("Host: " + String(hubIp));
-    client.println("Cache-Control: no-cache");
-    client.println("Content-Length: " + String(payload.length()));
-    client.println();
-    client.println(payload);
-    
-    delay(800);
-    Serial.println("Response: ");
-    while(client.available()) {
-      String line = client.readStringUntil('\r');
-      Serial.print(line);
-    }
-  }
-}
