@@ -2,25 +2,36 @@
 
 ADC_MODE(ADC_VCC);
 
+bool isConfigured() {
+  return (strlen(conf.wifiPassword) != 0 && strlen(conf.wifiSsid) != 0 &&
+          strlen(conf.hubIp) != 0 && conf.hubPort != NULL &&
+          strlen(conf.hubUser) != 0 && strlen(conf.hubPassword) != 0 &&
+          strlen(conf.hubSecret) != 0);
+}
+
 void setup() {
   start = millis();
   Serial.begin(115200);
 
   Serial.println("");
   Serial.print("EEPROM size required: ");
-  Serial.println(0+sizeof(wifiSsid)+sizeof(wifiPassword)+sizeof(hubIp)+sizeof(hubPort)+sizeof(hubUser)+sizeof(hubPassword)+sizeof(hubSecret)+sizeof("OK"));
+  Serial.println(0+sizeof(conf)+sizeof("OK"));
 
-  //saveCredentials();
-  loadCredentials();
-  if (strlen(wifiPassword) == 0 || strlen(wifiSsid) == 0 ||
-      strlen(hubIp) == 0 || hubPort == NULL) {
+  pinMode(14, INPUT);
+  int buttonState = digitalRead(14);
+  if (buttonState == LOW) {
+    Serial.print("Pin 14 is LOW, resetting EEPROM");
+    storeEeprom();
+  }
+
+  loadEeprom();
+  if (!isConfigured()) {
     setupServer();
   }
 }
 
 void loop() {
-  if (strlen(wifiPassword) == 0 || strlen(wifiSsid) == 0 ||
-      strlen(hubIp) == 0 || hubPort == NULL) {
+  if (!isConfigured()) {
     server.handleClient();
   } else if (WiFi.status() != WL_CONNECTED) {
     wifiConnect();
@@ -52,9 +63,10 @@ void loop() {
 }
 
 void wifiConnect() {
-  Serial.print("Connecting to AP");
+  Serial.print("Connecting to AP ");
+  Serial.print(conf.wifiSsid);
   WiFi.disconnect();
-  WiFi.begin(wifiSsid, wifiPassword);
+  WiFi.begin(conf.wifiSsid, conf.wifiPassword);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.print(".");
@@ -63,15 +75,3 @@ void wifiConnect() {
   Serial.println("");
   Serial.println("WiFi connected");  
 }
-
-void reset() {
-  Serial.println("Resetting credentials");
-  char wifiSsid[32] = "";
-  char wifiPassword[32] = "";
-  char hubIp[32] = "";
-  uint16_t hubPort = NULL;
-  saveCredentials();
-  Serial.println("Restarting");
-  ESP.restart();
-}
-

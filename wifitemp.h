@@ -21,12 +21,18 @@ const int retrySleepTimeS = 60;
 
 unsigned long start;
 
-char wifiSsid[32] = "";
-char wifiPassword[32] = "";
-char hubIp[64] = "";
-char hubUser[32] = "";
-char hubPassword[32] = "";
-char hubSecret[128] = "";
-uint16_t hubPort;
+typedef struct Configuration {
+  char wifiSsid[32] = "";
+  char wifiPassword[32] = "";
+  char hubIp[64] = "";
+  char hubUser[32] = "";
+  char hubPassword[32] = "";
+  char hubSecret[128] = "";
+  uint16_t hubPort;
+} Configuration;
+
+Configuration conf;
+
+unsigned int eepromSize = sizeof(conf) + sizeof("OK");
 #endif
 

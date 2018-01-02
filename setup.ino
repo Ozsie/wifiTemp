@@ -1,62 +1,44 @@
 #include "wifitemp.h"
 
 void handleRoot() {
-  if (server.arg("ssid") == "") {
-    server.send(200, "text/html", "<h1>SSID missing</h1>");
-    return;
-  } else {
-    server.arg("ssid").toCharArray(wifiSsid, sizeof(wifiSsid) - 1);
-  }
+  server.send(200, "text/html", "<h1>Hello</h1>");
+}
 
-  if (server.arg("password") == "") {
-    server.send(200, "text/html", "<h1>Password missing</h1>");
-    return;
-  } else {
-    server.arg("password").toCharArray(wifiPassword, sizeof(wifiPassword) - 1);
-  }
-
-  if (server.arg("ip") == "") {
-    server.send(200, "text/html", "<h1>IP missing</h1>");
-    return;
-  } else {
-    server.arg("ip").toCharArray(hubIp, sizeof(hubIp) - 1);
-  }
-
-  if (server.arg("port") == "") {
-    server.send(200, "text/html", "<h1>Port missing</h1>");
-    return;
-  } else {
-    hubPort = server.arg("port").toInt();
-  }
-
-  if (server.arg("hubUser") == "") {
-    server.send(200, "text/html", "<h1>Hub user missing</h1>");
-    return;
-  } else {
-    server.arg("hubUser").toCharArray(hubUser, sizeof(hubUser) - 1);
-  }
-
-  if (server.arg("hubPassword") == "") {
-    server.send(200, "text/html", "<h1>Hub password missing</h1>");
-    return;
-  } else {
-    server.arg("hubPassword").toCharArray(hubPassword, sizeof(hubPassword) - 1);
-  }
-
-  if (server.arg("hubSecret") == "") {
-    server.send(200, "text/html", "<h1>Hub secret missing</h1>");
-    return;
-  } else {
-    server.arg("hubSecret").toCharArray(hubSecret, sizeof(hubSecret) - 1);
-  }
+void handleConfig() {
+  handleStringConfig("ssid").toCharArray(conf.wifiSsid, sizeof(conf.wifiSsid) - 1);
+  handleStringConfig("password").toCharArray(conf.wifiPassword, sizeof(conf.wifiPassword) - 1);
+  conf.hubPort = handleIntConfig("port");
+  handleStringConfig("ip").toCharArray(conf.hubIp, sizeof(conf.hubIp) - 1);
+  handleStringConfig("hubUser").toCharArray(conf.hubUser, sizeof(conf.hubUser) - 1);
+  handleStringConfig("hubPassword").toCharArray(conf.hubPassword, sizeof(conf.hubPassword) - 1);
+  handleStringConfig("hubSecret").toCharArray(conf.hubSecret, sizeof(conf.hubSecret) - 1);
   server.send(200, "text/html", "<h1>OK!</h1>");
-  saveCredentials();
+  storeEeprom();
+}
+
+String handleStringConfig(String param) {
+  if (server.arg(param) == "") {
+    server.send(200, "text/html", "<h1>Missing parameter: " + param + "</h1>");
+    return "";
+  } else {
+    return server.arg(param);
+  }
+}
+
+int handleIntConfig(String param) {
+  if (server.arg(param) == "") {
+    server.send(200, "text/html", "<h1>Missing parameter: " + param + "</h1>");
+    return NULL;
+  } else {
+    return server.arg("port").toInt();
+  }
 }
 
 void setupServer() {
   delay(1000);
   
   Serial.println();
+  
   Serial.print("Configuring access point...");
 
   const char *ssid = "wifi-temp";
@@ -72,7 +54,8 @@ void setupServer() {
   Serial.print("GET ");
   Serial.print(myIP);
   Serial.println("/?ssid=<SSID>&password=<PASSWORD>&ip=<IP>&port=<PORT>&hubUser=<HUB_USER>&hubPassword=<HUB_PASSWORD>&hubSecret=<HUB_SECRET>");
-  server.on("/", handleRoot);
+  
+  server.on("/", handleConfig);
   server.begin();
 }
 
