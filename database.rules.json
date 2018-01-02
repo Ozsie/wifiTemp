@@ -3,14 +3,18 @@
     "sensors": {
       ".read": "true",
       ".write": "auth != null",
-      "data": {
+      "$sensor": {
         ".read": "true",
         ".write": "auth != null",
-        "$post": {
-          ".validate": "newData.hasChildren(['voltage', 'temperature', 'signal', 'runtime']) && newData.child('signal').isNumber() && newData.child('voltage').isNumber() && newData.child('temperature').isNumber() && newData.child('runtime').isNumber()",
-          ".read": "true"
-        },
-        ".indexOn": ["time", "runtime"]
+        "data": {
+          ".read": "true",
+          ".write": "auth != null",
+          "$post": {
+            ".validate": "newData.hasChildren(['voltage', 'temperature', 'signal', 'runtime']) && newData.child('signal').isNumber() && newData.child('voltage').isNumber() && newData.child('temperature').isNumber() && newData.child('runtime').isNumber()",
+            ".read": "true"
+          },
+          ".indexOn": ["time", "runtime"]
+        }
       }
     },
     "2854273": {
