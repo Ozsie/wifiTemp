@@ -58,7 +58,6 @@ var calculateAverageVoltageDrop = function(sensorId) {
     const sensorData = snapshot.val();
     for (var id in sensorData) {
       currentVoltage = sensorData[id].voltage;
-      console.log(sensorId, currentVoltage)
       if (currentVoltage > 5) {
         continue;
       }
@@ -91,7 +90,9 @@ var calculateAverageVoltageDrop = function(sensorId) {
         }
         var maxLife = Math.round((((Date.now() - chargeDate) / 3600000) + hoursLeft) * 10) / 10;
 
+        console.log(sensorId, currentVoltage);
         return admin.database().ref('/sensors/' + sensorId).child('avgVoltageDrop').set(avgVoltageDrop).then(function() {
+          console.log(sensorId, currentVoltage);
           admin.database().ref('/sensors/' + sensorId).child('currentVoltage').set(currentVoltage);
         }).then(function() {
           admin.database().ref('/sensors/' + sensorId).child('voltsLeft').set(voltsLeft);
@@ -109,7 +110,10 @@ var calculateAverageVoltageDrop = function(sensorId) {
       } else {
         return null;
       }
+    }).catch(function(error) {
+      console.error(error);
     });
+
   });
 };
 
