@@ -10,7 +10,7 @@ var sensorList = [];
 var settings = {
   axisX: {
     labelInterpolationFnc: function skipLabels(value, index) {
-      return index % 9  === 0 ? value : null;
+      return index % 8  === 0 ? value : null;
     }
   },
   showPoint: false,
@@ -139,6 +139,8 @@ document.addEventListener('DOMContentLoaded', function() {
           sensor.voltageChartData = chartData.v;
           sensor.signalChartData = chartData.s;
           sensor.execTimeChartData = chartData.e;
+          sensor.maxTemp = chartData.max;
+          sensor.minTemp = chartData.min;
           sensorList.push(sensor);
 
           selectCorrectOption();
@@ -212,21 +214,19 @@ function buildArrays(sensorData, sensorId, sensor, timeLimit) {
 
 
   sensor.warnings = checkWarningSigns(i, sensorData, sensorId, currentVoltage, diff);
-  settings.low = minTemp - 2;
-  settings.high = maxTemp + 2;
   tempChartData.series.push(temperature);
   voltageChartData.series.push(voltage);
   signalChartData.series.push(signal);
   execTimeChartData.series.push(exec);
 
-  return {v: voltageChartData, t: tempChartData, s: signalChartData, e: execTimeChartData};
+  return {v: voltageChartData, t: tempChartData, s: signalChartData, e: execTimeChartData, min: minTemp, max: maxTemp};
 }
 
 function checkWarningSigns(i, sensorData, sensorId, voltage, diff) {
   var warnings = {};
   // Is this the last data point?
   if (i == Object.keys(sensorData).length - 1) {
-    if (voltage < 3.0) {
+    if (voltage < 2.0) {
       warnings.battery = true;
     }
     if (diff> 60*60*1000) {
@@ -269,6 +269,8 @@ function updateDom() {
     reportWarning.classList.add('hidden');
   }
   document.getElementById('temp').innerHTML = 'Temperatur';
+  settings.low = sensorList[currentSensorIndex].minTemp - 2;
+  settings.high = sensorList[currentSensorIndex].maxTemp + 2;
   new Chartist.Line('#temperature', sensorList[currentSensorIndex].tempChartData, settings);
 
   var voltSeries = sensorList[currentSensorIndex].voltageChartData.series[0];
