@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#536878">
+    <title>Temperaturen</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="resources/icon-180.png">
+    <link rel="shortcut icon" href="resources/icon-32.png" type="image/png">
+
+    <script defer src="/__/firebase/4.6.2/firebase-app.js"></script>
+    <script defer src="/__/firebase/4.6.2/firebase-database.js"></script>
+    <script defer src="/__/firebase/init.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chartist-plugin-tooltips@0.0.17/dist/chartist-plugin-tooltip.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartist-plugin-tooltips@0.0.17/dist/chartist-plugin-tooltip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.3/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.3/locale/sv.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <script src="index.js"></script>
+    <p id="load" class="text-prominent">Laddar</p>
+    <div class="content" id="content">
+      <p id="sensor"></p>
+      <div class="wrapper">
+        <div class="boxLeft a">
+          <p id="temp" class="label"></p>
+          <div id="temperature" class="ct-chart ct-golden-section"></div>
+        </div>
+        <div class="boxRight b">
+          <p id="volt" class="label"></p>
+          <div id="voltage" class="ct-chart ct-double-octave"></div>
+        </div>
+        <div class="boxRight c">
+          <p id="sig" class="label"></p>
+          <div id="signal" class="ct-chart ct-double-octave"></div>
+        </div>
+        <div class="boxRight d hidden" id="execBox">
+          <p id="exec" class="label"></p>
+          <div id="execTimeChart" class="ct-chart ct-double-octave"></div>
+        </div>
+      </div>
+    </div>
+    <div class="header">
+      <div id="latest" class="text-prominent"></div>
+      <div id="currentSensor" class="text-prominent"></div>
+      <div class="currentWrapper">
+        <div class="currentBox text-weak" id="execTime" onclick="showExecTimeGraph()"></div>
+        <div class="currentBox text-weak" id="voltageChange"></div>
+        <div class="warning-container">
+          <div id="reportWarning" class="warning hidden">
+            <img src="resources/warning.png" class="warning-icon" alt="Varning">
+            <span>Sensorn har inte rapporterat i tid.</span>
+          </div>
+        </div>
+        <div class="warning-container">
+          <div id="batteryWarning" class="warning hidden">
+            <img src="resources/battery.png" class="warning-icon" alt="Batteri">
+            <span>Batteriet behöver laddas.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pure-menu pure-menu-horizontal pure-menu-scrollable menu">
+      <ul class="pure-menu-list">
+        <li class="li-menu-item">
+          <a href="admin.html" class="pure-menu-link">Admin</a>
+        </li>
+      </ul>
+      <ul class="pure-menu-list" id="sensors">
+      </ul>
+    </div>
+  </body>
+  <script src="initServiceWorker.js"></script>
+</html>

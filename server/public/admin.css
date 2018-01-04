@@ -1,0 +1,56 @@
+.sensor-table {
+  width: 90%;
+  margin-left: 5%;
+}
+.sensor-table tbody tr td {
+  padding-bottom: 3px;
+}
+.login-wrapper {
+	display: grid;
+	grid-template-columns: 100%;
+	text-align: center;
+}
+.login-a {
+	grid-column: 1;
+	grid-row: 1;
+}
+.login-b {
+	grid-column: 1;
+	grid-row: 2;
+}
+.login-c {
+	grid-column: 1;
+	grid-row: 3;
+}
+.box {
+	border-radius: 5px;
+	padding: 5px 5px 5px 5px;
+}
+.input-left {
+  border-radius: 4px 0px 0px 4px;
+  padding: 0.4em 0em 0.4em 0.4em;
+  border: 1px solid #ccc;
+  box-shadow: inset 0 1px 3px #ddd;
+  width: 100%;
+}
+.input-middle {
+  border: 1px solid #ccc;
+  box-shadow: inset 0 1px 3px #ddd;
+  margin-left: -1px;
+  padding: 0.4em 0em 0.4em 0.4em;
+  width: 100%;
+}
+.input-right {
+  border-radius: 0px 4px 4px 0px;
+  border: 1px solid #ccc;
+  box-shadow: inset 0 1px 3px #ddd;
+  margin-left: -1px;
+  padding: 0.4em 0em 0.4em 0.4em;
+  width: 90%;
+}
+.pure-button {
+  font-size: 80%;
+}
+.button-success {
+    background: rgb(28, 184, 65);
+}

@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  - "node"
+  - "8"
+  - "7"
+install:
+  - "yarn install"
+test:
+  - "yarn run test"
+branches:
+  only:
+    - "master"

@@ -1,0 +1,21 @@
+{
+  "name": "tempServer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Oscar Djupfeldt",
+  "license": "MIT",
+  "scripts": {
+    "pretest": "yarn run lint",
+    "test": "echo 'n/a'",
+    "lint": "eslint ./public/*.js ./functions/index.js --ignore-path .eslintignore",
+    "serve": "firebase serve",
+    "deploy": "firebase deploy",
+    "deploy-f": "firebase deploy --only functions",
+    "deploy-h": "firebase deploy --only hosting",
+    "deploy-d": "firebase deploy --only database",
+    "logs": "firebase functions:log"
+  },
+  "devDependencies": {
+    "eslint": "^4.9.0"
+  }
+}
