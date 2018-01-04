@@ -77,6 +77,9 @@ var calculateAverageVoltageDrop = function(sensorId) {
       }
       previousVoltage = currentVoltage;
     }
+    if (minVoltage === currentVoltage) {
+      minVoltage = 2.8;
+    }
     return admin.database().ref('/sensors/' + sensorId).child('maxVoltage').set(maxVoltage).then(function() {
       if (voltageDrops.length > 2) {
         voltageDrops.sort((a, b) => a - b);
